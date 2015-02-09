@@ -1,5 +1,5 @@
 Package: libstatusbar8
-Name: libstatusbar -efrederickson
+Name: libstatusbar (efrederickson)
 Provides: libstatusbar
 Replaces: libstatusbar
 Conflicts: libstatusbar

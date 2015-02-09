@@ -38,10 +38,10 @@
 	maxlen = screenSz.width * 0.6f;
 	
 	// ellipsize strings if they're too long
-	if([timeString sizeWithFont:(UIFont*)[self textFont]].width > maxlen)
+	if([timeString sizeWithAttributes:@{NSFontAttributeName:[self textFont]}].width > maxlen)
 	{
 		[timeString replaceCharactersInRange: (NSRange){[timeString length]-1, 1} withString: @"…"];
-		while([timeString length]>3 && [timeString sizeWithFont: (UIFont*) [self textFont]].width > maxlen)
+		while([timeString length]>3 && [timeString sizeWithAttributes:@{NSFontAttributeName:[self textFont]}].width > maxlen)
 		{
 			[timeString replaceCharactersInRange: (NSRange){[timeString length]-2, 1} withString: @""];
 		}

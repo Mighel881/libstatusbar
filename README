@@ -1,0 +1,15 @@
+This is a fork of libstatusbar. 
+
+It contains some improvements and fixes including:
+- Updated to use Logos (and many other syntax enhancements)
+- Updated to use ARC
+- Only hooks into UIKit processes using the MobileSubstrate filter
+- Fix enumeration crash
+- Allows icons in the center
+- Fixes the "flash" when opening apps / icons not showing in apps until updateStatusBar is called (again)
+- Doesn't cut off items when there are too many (probably causes some visual issues)
+- Attempts to fix centering of multiple items in the center alignment
+
+Negative changes:
+- Dropped armv6 support (because I don't have the SDKs for it)
+- (May have) dropped <iOS 7 support
