@@ -284,6 +284,17 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self)
 	}
 }
 
+- (void)workspace:(id)arg1 didLaunchWithCompletion:(id)arg2
+{
+	%orig;
+
+	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
+	if(%c(SpringBoard) || SBSSpringBoardServerPort())
+	{
+		[[LSStatusBarClient sharedInstance] updateStatusBar];
+	}
+}
+
 %new -(void) addStatusBarImageNamed:(NSString*)name removeOnExit:(BOOL)remove
 {
 	[[LSStatusBarClient sharedInstance] setProperties:@(1) forItem:name];
