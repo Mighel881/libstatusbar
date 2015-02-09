@@ -1,60 +1,37 @@
-
-
-//#define TESTING
-
 #import "common.h"
-#import "defines.h"
-
 #import "LSStatusBarItem.h"
 #import "LSStatusBarClient.h"
-
-
-#import "classes.h"
-
 
 NSMutableDictionary* sbitems = nil;
 
 @implementation LSStatusBarItem
-
-
 + (void) _updateProperties: (NSMutableDictionary*) dict forIdentifier: (NSString*) identifier
 {
-	
 	if(!sbitems)
 	{
 		sbitems = [NSMutableDictionary new];
 	}
-	
 	
 	NSArray* idArray = [sbitems objectForKey: identifier];
 	for(LSStatusBarItem* item in idArray)
 	{
 		[item _setProperties: dict];
 	}
-	
 }
-
 
 - (id) initWithIdentifier: (NSString*) identifier alignment: (StatusBarAlignment) alignment
 {
 	if(!identifier)
 	{
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: No identifer specified"];
+		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: No identifer specified"];
 	}
 	
 	if(!alignment)
 	{
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Alignment not specified"];
+		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Alignment not specified"];
 	}
 	
-	/*
-	if($UIApplication && ![$UIApplication sharedApplication])
-	{
-		TRACE_F();
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Wait for UIApp to load!"];
-	}*/
-	
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
 		
 		if(!sbitems)
@@ -63,54 +40,44 @@ NSMutableDictionary* sbitems = nil;
 		}
 		
 		
-		NSMutableArray* idArray = [sbitems objectForKey: identifier];
+		NSMutableArray* idArray = [sbitems objectForKey:identifier];
 		LSStatusBarItem* item = idArray ? [idArray count] ? [idArray objectAtIndex: 0] : nil : nil;
-		NSMutableDictionary* properties = item ? [item properties] : nil;
+		NSMutableDictionary* properties = item ? (NSMutableDictionary*)[item properties] : nil;
 		if(!properties)
 			properties = [NSMutableDictionary new];
 		
+		_identifier = identifier;
 		
-		// save all the settings
+		[self _setProperties: properties];
+		
+		NSNumber* align = [_properties objectForKey: @"alignment"];
+		if(!align)
 		{
-			_identifier = [identifier retain];
-			
-			[self _setProperties: properties];
-			
-			NSNumber* align = [_properties objectForKey: @"alignment"];
-			if(!align)
-			{
-				[_properties setObject: [NSNumber numberWithInt: alignment] forKey: @"alignment"];
-			}
-			else if([align intValue] != alignment)
-			{
-				[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: You cannot specify a new alignment!"];	
-			}
+			[_properties setObject: [NSNumber numberWithInt: alignment] forKey: @"alignment"];
+		}
+		else if([align intValue] != alignment)
+		{
+			[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: You cannot specify a new alignment!"];	
 		}
 		
-		// keep track of StatusBarItem(s)
+		idArray = [sbitems objectForKey:identifier];
+		if(!idArray)
 		{
-			
-			NSMutableArray* idArray = [sbitems objectForKey: identifier];
-			if(!idArray)
-			{
-				// this creates a retain/release-less NSMutableArray
-				idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-				[sbitems setObject: idArray forKey: identifier];
-				CFRelease(idArray);
-			}
-		
-			if(idArray)
-			{
-				[idArray addObject: self];
-			}
+			[sbitems setObject:[NSMutableArray array] forKey:identifier];
 		}
+	
+		if(idArray)
+		{
+			[idArray addObject:self];
+		}
+
 		return self;
 	}
 	
 	return nil;
 }
 
-
+/*
 - (void) dealloc
 {
 	if(sbitems)
@@ -124,8 +91,9 @@ NSMutableDictionary* sbitems = nil;
 			
 			if([idArray count] == 0)
 			{
-				// item is no longer in use by this process, let the server no
-				[[LSStatusBarClient sharedInstance] setProperties: nil forItem: _identifier];
+				// item is no longer in use by this process, let the server know
+				[[LSStatusBarClient sharedInstance] setProperties:nil forItem:_identifier];
+				[sbitems removeObjectForKey:_identifier];
 			}
 		}
 		
@@ -135,6 +103,7 @@ NSMutableDictionary* sbitems = nil;
 	
 	[super dealloc];
 }
+*/
 
 - (NSDictionary*) properties
 {
@@ -146,7 +115,8 @@ NSMutableDictionary* sbitems = nil;
 {
 	if(dict == _properties)
 		return;
-	[_properties release];
+	_properties = nil;
+	
 	if(!dict)
 	{
 		_properties = [NSMutableDictionary new];
@@ -201,7 +171,7 @@ NSMutableDictionary* sbitems = nil;
 {
 	if(self.alignment & StatusBarAlignmentCenter)
 	{
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Cannot use images with a center alignment"];
+		//[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Cannot use images with a center alignment"];
 	}
 	
 	NSString* oldImageName = [_properties objectForKey: @"imageName"];
@@ -231,7 +201,7 @@ NSMutableDictionary* sbitems = nil;
 	
 	if((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString: string]))
 	{
-		NSLog(@"oldTitle = %@, newTitle = %@", oldTitle, string);
+		//NSLog(@"oldTitle = %@, newTitle = %@", oldTitle, string);
 		
 		[_properties setValue: string forKey: @"titleString"];	
 
@@ -276,19 +246,18 @@ NSMutableDictionary* sbitems = nil;
 
 - (void) update
 {
-	SelLog();	
 	[[LSStatusBarClient sharedInstance] setProperties: _properties forItem: _identifier];
-	
 	[LSStatusBarItem _updateProperties: _properties forIdentifier: _identifier];
-
 }
-
 
 // future API
 
 - (void) setExclusiveToApp: (NSString*) bundleId
 {
 	[_properties setObject: bundleId forKey: @"exclusiveToApp"];
+	
+	if(!_manualUpdate)
+		[self update];
 }
 
 - (NSString*) exclusiveToApp

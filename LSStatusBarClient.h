@@ -1,4 +1,3 @@
-
 @interface LSStatusBarClient : NSObject
 {
 	bool _isLocal;
@@ -18,8 +17,8 @@
 - (void) resubmitContent;
 - (void) updateStatusBar;
 
-- (void) setProperties: (id) properties forItem: (NSString*) item;
+- (void) setProperties:(id)properties forItem:(NSString*)item;
 
-- (NSString*) titleStringAtIndex: (int) idx;
+- (NSString*) titleStringAtIndex:(int)idx;
 
 @end

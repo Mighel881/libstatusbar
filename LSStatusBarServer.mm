@@ -1,18 +1,11 @@
-
-//#define TESTING
-
 #import "common.h"
-#import "defines.h"
-
-#import "classes.h"
 #import "LSStatusBarServer.h"
-
 #import "LSStatusBarItem.h"
 
+NSUInteger TitleStringIndex = -1;
 
 void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer* server)
 {
-//	NSLine();
 	[server updateLockStatus];
 }
 
@@ -21,10 +14,7 @@ void incrementTimer()//CFRunLoopTimerRef timer, LSStatusBarServer* self)
 	[[LSStatusBarServer sharedInstance] incrementTimer];
 }
 
-
 @implementation LSStatusBarServer
-
-
 + (id) sharedInstance
 {
 	static LSStatusBarServer* server;
@@ -36,13 +26,12 @@ void incrementTimer()//CFRunLoopTimerRef timer, LSStatusBarServer* self)
 	return server;
 }
 
-
 - (id) init
 {
 	self = [super init];
 	if(self)
 	{
-		_dmc = [CPDistributedMessagingCenter centerNamed: @"com.apple.springboard.libstatusbar"];
+		_dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 		
 		void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
 		if(handle)
@@ -50,121 +39,92 @@ void incrementTimer()//CFRunLoopTimerRef timer, LSStatusBarServer* self)
 			void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
 			rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
 			rocketbootstrap_distributedmessagingcenter_apply(_dmc);
+			dlclose(handle);
 		}
 		
-		
 		[_dmc runServerOnCurrentThread];
-		[_dmc registerForMessageName: @"currentMessage" target: self selector: @selector(currentMessage)];
-		[_dmc registerForMessageName: @"setProperties:userInfo:" target: self selector: @selector(setProperties:userInfo:)];
+		[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
+		[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
 		
 		_currentMessage = [[NSMutableDictionary alloc] init];
 		_currentKeys = [[NSMutableArray alloc] init];
 		_currentKeyUsage = [[NSMutableDictionary alloc] init];
 		
 		CFNotificationCenterRef darwin = CFNotificationCenterGetDarwinNotifyCenter();
-		CFNotificationCenterAddObserver(darwin, self, (CFNotificationCallback) updateLockStatus, (CFStringRef) @"com.apple.springboard.lockstate", self, NULL);
-		
+		CFNotificationCenterAddObserver(darwin, (const void *)self, (CFNotificationCallback) updateLockStatus, CFSTR("com.apple.springboard.lockstate"), (const void *)self, CFNotificationSuspensionBehaviorDeliverImmediately);
 		
 		notify_post("LSBDidLaunchNotification");
 	}
 	return self;
 }
 
-
-
-
 - (NSMutableDictionary*) currentMessage
 {
-	return _currentMessage;
+	return [_currentMessage copy]; // copy to attempt crash fix of enumeration
 }
 
 - (void) postChanged
 {
-	SelLog();
-//	NSLine();
 	notify_post("libstatusbar_changed");
 }
 
 - (void) enqueuePostChanged
 {
-	SelLog();
-//	NSLine();
 	NSRunLoop* loop = [NSRunLoop mainRunLoop];
 	
-	[loop cancelPerformSelector: @selector(postChanged) target: self argument: nil];
-	[loop performSelector: @selector(postChanged) target: self argument: nil order: 0 modes: [NSArray arrayWithObject: NSDefaultRunLoopMode]];
-	
-	//[NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(postChanged) object: nil];
-	//[self performSelector: @selector(postChanged) withObject: nil afterDelay: 0.0001f];	
+	[loop cancelPerformSelector:@selector(postChanged) target:self argument:nil];
+	[loop performSelector: @selector(postChanged) target:self argument:nil order:0 modes:@[NSDefaultRunLoopMode]];
 }
 
-- (void) processMessageCommonWithFocus: (NSString*) item
+- (void) processMessageCommonWithFocus:(NSString*)item
 {
-	NSLog(@"processing %@", item);
-	
 	timeHidden = NO;
 	
 	NSMutableArray* titleStrings = [NSMutableArray array];
-	for(NSString* key in _currentKeys)
+	for(NSString* key in [_currentKeys copy])
 	{
-		NSDictionary* dict = [_currentMessage objectForKey: key];
+		NSDictionary* dict = [_currentMessage objectForKey:key];
 		
-		if(!dict || ![dict isKindOfClass: [NSDictionary class]])
+		if(!dict || ![dict isKindOfClass:[NSDictionary class]])
 			continue;
 		
-		NSNumber* alignment = [dict objectForKey: @"alignment"];
+		NSNumber* alignment = [dict objectForKey:@"alignment"];
 		if(alignment && ((StatusBarAlignment) [alignment intValue]) == StatusBarAlignmentCenter)
 		{
-			NSNumber* visible = [dict objectForKey: @"visible"];
+			NSNumber* visible = [dict objectForKey:@"visible"];
 			if(!visible || [visible boolValue])
 			{
-				NSString* titleString = [dict objectForKey: @"titleString"];
+				NSString* titleString = [dict objectForKey:@"titleString"];
 				if(titleString && [titleString length])
 				{
 					if(item && [item isEqualToString: key])
 					{
-						[self setState: [titleStrings count]];
+						[self setState:[titleStrings count]];
 						[self resyncTimer];
 					}
-					[titleStrings addObject: titleString];
+					[titleStrings addObject:titleString];
 					
 					if([[dict objectForKey: @"hidesTime"] boolValue])
-					{
 						timeHidden = YES;
-					}
 				}
 			}
 		}
 	}
 	
-	[_currentMessage setValue: _currentKeys forKey: @"keys"];
-//	NSDesc(_currentKeys);
-	
-	
-	
+	[_currentMessage setValue:_currentKeys forKey:@"keys"];
 	if([titleStrings count])
 	{
-		[_currentMessage setValue: titleStrings forKey: @"titleStrings"];
-		
+		[_currentMessage setValue:titleStrings forKey:@"titleStrings"];
 		[self startTimer];
 	}
 	else
 	{
-		[_currentMessage setValue: nil forKey: @"titleStrings"];
-		
-		//if(!timer)
-		//	notify_post("libstatusbar_changed");
+		[_currentMessage setValue:nil forKey:@"titleStrings"];
 		[self stopTimer];
 	}
-//	NSDesc(_currentMessage);
 	
 	[self enqueuePostChanged];
-	//[NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(postChanged) object: nil];
-	//[self performSelector: @selector(postChanged) withObject: nil afterDelay: 0.0f];
 }
-
-
-
 
 static void NoteExitKQueueCallback(
     CFFileDescriptorRef f, 
@@ -172,22 +132,17 @@ static void NoteExitKQueueCallback(
     NSNumber *              pidinfo
 )
 {
-//    struct kevent   event;
-//    (void) kevent( CFFileDescriptorGetNativeDescriptor(f), NULL, 0, &event, 1, NULL);
-//    NSLog(@"terminated %d", (int) (pid_t) event.ident);
-
-    [[LSStatusBarServer sharedInstance] pidDidExit: [pidinfo autorelease]];
+    [[LSStatusBarServer sharedInstance] pidDidExit:pidinfo];
 }
 
 
 void MonitorPID(NSNumber* pid)
 {
-    FILE *                  f;
+    //FILE *                f;
     int                     kq;
     struct kevent           changes;
-    CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
+    CFFileDescriptorContext context = { 0, (void *)CFBridgingRetain(pid), NULL, NULL, NULL };
     CFRunLoopSourceRef      rls;
-
 
     kq = kqueue();
 
@@ -203,39 +158,33 @@ void MonitorPID(NSNumber* pid)
 
 }
 
-
 - (void) registerPid: (NSNumber*) thepid
 {
 	int pid = [thepid intValue];
-	if(!pid)
+	if (!pid)
 		return;
 	
-	if(!clientPids)
-	{
+	if (!clientPids)
 		clientPids = [[NSMutableArray alloc] init];
-	}
-	if(![clientPids containsObject: thepid])
+
+	if (![clientPids containsObject: thepid])
 	{
 		[clientPids addObject: thepid];
-		
 		MonitorPID(thepid);
-			
 	}
 }
 
 - (void) setProperties: (id) properties forItem: (NSString*) item bundle: (NSString*) bundle pid: (NSNumber*) pid
 {
-//	SelLog();
 	if(!item || !pid)
 	{
-		NSLog(@"missing info. returning... %@ %@", [item description], [pid description]);
+		NSLog(@"[libstatusbar] Server: Missing info, returning... %@ %@", [item description], [pid description]);
 		return;
 	}
 	
-	[self registerPid: pid];
+	[self registerPid:pid];
 	
 	// get the current item usage by bundles
-	
 	
 	NSMutableArray* pids = [_currentKeyUsage objectForKey: item];
 	if(!pids)
@@ -264,7 +213,6 @@ void MonitorPID(NSNumber* pid)
 	else
 	{
 		[pids removeObject: pid];
-		NSLog(@"removing object");
 		
 		if([pids count]==0)
 		{
@@ -276,28 +224,12 @@ void MonitorPID(NSNumber* pid)
 		}
 	}
 	
-	/*
-	int itemIdx = [_currentKeys indexOfObject: item];
-	if(!properties && itemIdx != NSNotFound)
-	{
-		[_currentKeys removeObjectAtIndex: itemIdx];
-	}
-	else if(properties && itemIdx == NSNotFound)
-	{
-		[_currentKeys addObject: item];
-	}
-	*/
-	
-	
 	// find all title strings
-	
 	[self processMessageCommonWithFocus: item];
 }
 
 - (void) pidDidExit: (NSNumber*) pid
 {
-	NSLine();
-	
 	int nKeys = [_currentKeys count];
 	for(int i=nKeys - 1; i>=0; i--)
 	{
@@ -309,10 +241,10 @@ void MonitorPID(NSNumber* pid)
 			continue;
 		}
 
-		if([pids containsObject: pid])
+		if([pids containsObject:pid])
 		{
-			[pids removeObject: pid];
-			NSLog(@"removing object");
+			[pids removeObject:pid];
+			NSLog(@"[libstatusbar] Server: Removing object for PID %@", pid);
 
 			if([pids count]==0)
 			{
@@ -327,47 +259,40 @@ void MonitorPID(NSNumber* pid)
 	}
 	
 	[self processMessageCommonWithFocus: nil];
-	
 }
-
 
 - (void) appDidExit: (NSString*) bundle
 {
-	
-	
 	int nKeys = [_currentKeys count];
 	for(int i=nKeys - 1; i>=0; i--)
 	{
 		NSString* item = [_currentKeys objectAtIndex: i];
 		
-		NSMutableArray* pids = [_currentKeyUsage objectForKey: item];
+		NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
 		if(!pids)
 		{
 			continue;
 		}
 
-		if([pids containsObject: bundle])
+		if([pids containsObject:bundle])
 		{
-			[pids removeObject: bundle];
-			NSLog(@"removing object");
+			[pids removeObject:bundle];
+			NSLog(@"[libstatusbar] Server: Removing object for bundle %@", bundle);
 
 			if([pids count]==0)
 			{
 				// object is truly dead
-				[_currentMessage setValue: nil forKey: item];
+				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIdx = [_currentKeys indexOfObject: item];
-				if(itemIdx!=NSNotFound)
-					[_currentKeys removeObjectAtIndex: itemIdx];
+				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
+				if (itemIdx != NSNotFound)
+					[_currentKeys removeObjectAtIndex:itemIdx];
 			}
 		}
 	}
 	
 	[self processMessageCommonWithFocus: nil];
 }
-
-
-
 
 - (void) setProperties: (NSString*) message userInfo: (NSDictionary*) userInfo
 {
@@ -379,19 +304,10 @@ void MonitorPID(NSNumber* pid)
 	[self setProperties: properties forItem: item bundle: bundleId pid: pid];
 }
 
-
 - (void) setState: (NSUInteger) newState
 {
-	uint64_t value = newState;
-	static int token = -1;
-	if(token < 0)
-	{
-		const char* notif = "libstatusbar_changed";
-		notify_register_check(notif, &token);
-	}
-	notify_set_state(token, value);
+	_currentMessage[@"TitleStringIndex"] = @(newState);
 	[self enqueuePostChanged];
-	
 }
 
 - (void) resyncTimer
@@ -404,19 +320,14 @@ void MonitorPID(NSNumber* pid)
 		timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 		CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
 	}
-	
-	
 }
-
 
 - (void) startTimer
 {
-	NSLine();
-	
 	// is timer already running?
 	if(timer)
 	{
-		NSLog(@"timer is already active.  Leaving it alone");
+		NSLog(@"[libstatusbar] Server: Timer is already active. Ignoring request to start timer.");
 		return;
 	}
 	
@@ -431,130 +342,69 @@ void MonitorPID(NSNumber* pid)
 		notify_get_state(token, &locked);
 	}
 	
-//	NSLine();
-	
 	// reset timer state
 	[self stopTimer];
-//	NSLine();
 	
 	if(!locked)
 	{
-		NSLine();
-		
 		NSArray* titleStrings = [_currentMessage objectForKey: @"titleStrings"];
 		if(titleStrings && [titleStrings count])
 		{
-			NSLine();
-		
 			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 			CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
 			
 			{
-				/*
-				const char* notif = "libstatusbar_changed";
-				uint64_t value = 0;
-				int token = 0;
-				notify_register_check(notif, &token);
-				notify_set_state(token, value);
-				*/
 				[self setState: 0];
 				
 				[self enqueuePostChanged];
-				//notify_post(notif);
 			}
 			
 		}
 	}
-//	NSLine();
-	
 }
 
 - (void) stopTimer
 {
-//	NSLine();
-	
 	// reset the statusbar state
-	{
-		/*
-		const char* notif = "libstatusbar_changed";
-		
-		uint64_t value = NSNotFound;
-		int token = 0;
-		notify_register_check(notif, &token);
-		notify_set_state(token, value);
-		*/
-		
-		if(timer) // only post a notification if the timer was running
-			[self enqueuePostChanged];
-			//notify_post(notif);
-	}
-	
-	[self setState: NSNotFound];
+
+	if(timer) // only post a notification if the timer was running
+		[self enqueuePostChanged];
+	[self setState:NSNotFound];
 	// kill timer
 	if(timer)
 	{
 		CFRunLoopTimerInvalidate(timer);
 		CFRelease(timer);
 		timer = nil;
+		TitleStringIndex = -1;
 		[self enqueuePostChanged];
 	}
-//	NSLine();
 }
-
 
 - (void) incrementTimer
 {
-	NSLine();
-	
 	NSArray* titleStrings = [_currentMessage objectForKey: @"titleStrings"];
-	
-	const char* notif = "libstatusbar_changed";
 	
 	if(titleStrings && [titleStrings count])
 	{
-		uint64_t value;
-		static int token = -1;
-		if(token < 0)
-		{
-			notify_register_check(notif, &token);
-		}
-		notify_get_state(token, &value);
-		
-		value++;
+		int value = TitleStringIndex; // -1 ++ = 0. so it should work
+		TitleStringIndex++; 
 		if(timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count]) )
 		{
 			value = 0;
+			TitleStringIndex = -1;
 		}
-		
-		NSLog(@"idx = %ld", value);
-		
-		notify_set_state(token, value);
-		
-		[self enqueuePostChanged];
-		//notify_post(notif);
+		[self setState:value];
 	}
 	else
 	{
 		[self stopTimer];
-		/*
-		NSLog(@"idx = %ld", value);
-		
-		CFRunLoopTimerInvalidate(timer);
-		CFRelease(timer);
-		timer = nil;
-		
-		notify_post(notif);
-		*/
 	}	
 }
-
 
 - (void) updateLockStatus
 {
 	[self stopTimer];
 	[self startTimer];
 }
-
-
-
 @end
