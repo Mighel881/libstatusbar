@@ -1,3 +1,4 @@
+#import <objc/runtime.h>
 #import "common.h"
 #import "LSStatusBarServer.h"
 #import "LSStatusBarItem.h"
@@ -31,21 +32,24 @@ void incrementTimer()//CFRunLoopTimerRef timer, LSStatusBarServer* self)
 	self = [super init];
 	if(self)
 	{
-		_dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+		_dmc = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.apple.springboard.libstatusbar"];
 		
-		void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-		if(handle)
+		if (_dmc)
 		{
-			void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-			rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-			rocketbootstrap_distributedmessagingcenter_apply(_dmc);
-			dlclose(handle);
+			void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
+			if(handle)
+			{
+				void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
+				rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
+				rocketbootstrap_distributedmessagingcenter_apply(_dmc);
+				dlclose(handle);
+			}
+			
+			[_dmc runServerOnCurrentThread];
+			[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
+			[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
+			NSLog(@"[libstatusbar] server running in process without AppSupport/CPDistributedMessagingCenter");
 		}
-		
-		[_dmc runServerOnCurrentThread];
-		[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
-		[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
-		
 		_currentMessage = [[NSMutableDictionary alloc] init];
 		_currentKeys = [[NSMutableArray alloc] init];
 		_currentKeyUsage = [[NSMutableDictionary alloc] init];

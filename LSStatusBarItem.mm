@@ -12,10 +12,10 @@ NSMutableDictionary* sbitems = nil;
 		sbitems = [NSMutableDictionary new];
 	}
 	
-	NSArray* idArray = [sbitems objectForKey: identifier];
-	for(LSStatusBarItem* item in idArray)
+	NSArray* idArray = [sbitems objectForKey:identifier];
+	for (LSStatusBarItem* item in idArray)
 	{
-		[item _setProperties: dict];
+		[item _setProperties:dict];
 	}
 }
 

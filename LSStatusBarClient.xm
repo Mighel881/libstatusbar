@@ -72,9 +72,9 @@ extern "C" mach_port_t bootstrap_port;
 	{
 		static CPDistributedMessagingCenter* dmc = nil; 
 		
-		if (!dmc)
+		if (!dmc && %c(CPDistributedMessagingCenter) != nil)
 		{
-			dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+			dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
 
 			static void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
 			if(!rocketbootstrap_distributedmessagingcenter_apply)
@@ -92,7 +92,8 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 
-		_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
+		if (dmc)
+			_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
 	}
 }
 
@@ -284,12 +285,12 @@ extern "C" mach_port_t bootstrap_port;
 		NSString* bundleId = [[NSBundle mainBundle] bundleIdentifier];
 		if(_isLocal)
 		{
-			[[LSStatusBarServer sharedInstance] setProperties: properties forItem: item bundle: bundleId pid: [NSNumber numberWithInt: 0]];
+			[[LSStatusBarServer sharedInstance] setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt: 0]];
 		}
 		else //if(LSBServerPort())
 		//else if(SBSSpringBoardServerPort())
 		{
-			NSNumber* pid = [NSNumber numberWithInt: getpid()];
+			NSNumber* pid = [NSNumber numberWithInt:getpid()];
 			
 			NSMutableDictionary* dict = [[NSMutableDictionary alloc] initWithCapacity:4];
 			if(item)
@@ -301,24 +302,31 @@ extern "C" mach_port_t bootstrap_port;
 			if(bundleId)
 				[dict setObject:bundleId forKey:@"bundle"];
 
-			CPDistributedMessagingCenter* dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
-			
-			static void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
-			if(!rocketbootstrap_distributedmessagingcenter_apply)
+			if (%c(CPDistributedMessagingCenter))
 			{
-				void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-				if(handle)
+				CPDistributedMessagingCenter* dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
+				
+				static void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
+				if(!rocketbootstrap_distributedmessagingcenter_apply)
 				{
-					rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-					dlclose(handle);
+					void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
+					if(handle)
+					{
+						rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
+						dlclose(handle);
+					}
 				}
+				if(rocketbootstrap_distributedmessagingcenter_apply)
+				{
+					rocketbootstrap_distributedmessagingcenter_apply(dmc);
+				}
+				
+				[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
 			}
-			if(rocketbootstrap_distributedmessagingcenter_apply)
+			else
 			{
-				rocketbootstrap_distributedmessagingcenter_apply(dmc);
+				NSLog(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
 			}
-			
-			[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
 		}
 	}
 }
