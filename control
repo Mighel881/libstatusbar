@@ -6,13 +6,8 @@ Conflicts: libstatusbar
 Depends: mobilesubstrate
 Version: 1337
 Architecture: iphoneos-arm
-Description: 
- Libstatusbar8
- An updated libstatusbar with better features
- including:
- - images in the center
- - proper centering of the items in the center
- - doesn't arbitrarily cut off items (could cause issues of overlap...)
+Description: Improved libstatusbar
+Depiction: http://elijahandandrew.com/repo/depictions/Libstatusbar/
 Maintainer: Elijah Frederickson <elijah.frederickson@gmail.com>
 Author: phoenix3200 & Elijah Frederickson <elijah.frederickson@gmail.com>
 Section: Tweaks

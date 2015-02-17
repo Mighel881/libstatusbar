@@ -77,12 +77,11 @@ NSMutableDictionary* sbitems = nil;
 	return nil;
 }
 
-/*
 - (void) dealloc
 {
 	if(sbitems)
 	{
-		NSMutableArray* idArray = [sbitems objectForKey: _identifier]; 
+		NSMutableArray* idArray = [sbitems objectForKey:_identifier]; 
 		
 		// kill the current item count
 		if(idArray)
@@ -96,20 +95,16 @@ NSMutableDictionary* sbitems = nil;
 				[sbitems removeObjectForKey:_identifier];
 			}
 		}
-		
-		[_identifier release];
-		[_properties release];
 	}
-	
+#if !__has_feature(objc_arc)
 	[super dealloc];
+#endif
 }
-*/
 
 - (NSDictionary*) properties
 {
 	return _properties;
 }
-
 
 - (void) _setProperties: (NSDictionary*) dict
 {

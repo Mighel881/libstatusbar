@@ -104,12 +104,10 @@
 %new
 -(UIStatusBarItemView*) viewForManager:(UIStatusBarLayoutManager*)manager
 {
-	__strong NSMutableDictionary *&_views(MSHookIvar<NSMutableDictionary *>(self, "_views"));
+	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 	if(_views)
 	{
-		// Have to do the NSValue wrapping because otherwise it tries to copy manager, resulting in a fail because it doesn't have a -copyWithZone: method
-		//return [_views objectForKey:[NSValue valueWithNonretainedObject:manager]];
-		return (UIStatusBarItemView*) CFDictionaryGetValue((__bridge CFMutableDictionaryRef)_views, (void*) manager);
+		return (UIStatusBarItemView*) CFDictionaryGetValue(_views, (void*) manager);
 	}
 	else
 	{
@@ -120,23 +118,29 @@
 %new
 - (void) setView:(UIStatusBarItemView*)view forManager:(UIStatusBarLayoutManager*)manager
 {
-	__strong NSMutableDictionary *&_views(MSHookIvar<NSMutableDictionary*>(self, "_views"));
+	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 	if(!_views)
-		_views = [NSMutableDictionary dictionary];
+	{
+		_views = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+	}
+	CFDictionarySetValue(_views, (void*) manager, (const void *)view);
+}
 
-	CFDictionarySetValue((__bridge CFMutableDictionaryRef)_views, (void*) manager, (const void *)view);
-	//[_views setObject:view forKey:[NSValue valueWithNonretainedObject:manager]];
+void UIStatusBarCustomItem$removeFromSuperview(id key, UIView* view)
+{
+	if(view)
+		[view removeFromSuperview];
 }
 
 %new
 -(void) removeAllViews
 {
-	__strong NSMutableDictionary *&_views(MSHookIvar<NSMutableDictionary*>(self, "_views"));
+	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 	
 	if(_views)
-		for (UIView *view in _views.allValues)
-			if (view)
-				[view removeFromSuperview];
+	{
+		CFDictionaryApplyFunction(_views, (CFDictionaryApplierFunction) UIStatusBarCustomItem$removeFromSuperview, NULL);
+	}
 }
 %end
 
