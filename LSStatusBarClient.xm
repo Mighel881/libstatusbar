@@ -70,13 +70,13 @@ extern "C" mach_port_t bootstrap_port;
 	}
 	else //if(LSBServerPort())
 	{
-		static CPDistributedMessagingCenter* dmc = nil; 
+		CPDistributedMessagingCenter* dmc = nil; 
 		
 		if (!dmc && %c(CPDistributedMessagingCenter) != nil)
 		{
 			dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
 
-			static void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
+			void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
 			if(!rocketbootstrap_distributedmessagingcenter_apply)
 			{
 				void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
@@ -97,11 +97,11 @@ extern "C" mach_port_t bootstrap_port;
 	}
 }
 
-- (NSString*) titleStringAtIndex: (int) idx
+- (NSString*) titleStringAtIndex:(int)idx
 {
-	if(idx < [_titleStrings count] && idx >= 0)
+	if(idx < _titleStrings.count && idx >= 0)
 	{
-		return [_titleStrings objectAtIndex: idx];
+		return [_titleStrings objectAtIndex:idx];
 	}
 	return nil;
 }
@@ -306,7 +306,7 @@ extern "C" mach_port_t bootstrap_port;
 			{
 				CPDistributedMessagingCenter* dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
 				
-				static void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
+				void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
 				if(!rocketbootstrap_distributedmessagingcenter_apply)
 				{
 					void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);

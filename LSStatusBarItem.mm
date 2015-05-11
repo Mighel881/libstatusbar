@@ -86,7 +86,7 @@ NSMutableDictionary* sbitems = nil;
 		// kill the current item count
 		if(idArray)
 		{
-			[idArray removeObject: self];
+			[idArray removeObject:self];
 			
 			if([idArray count] == 0)
 			{

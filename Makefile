@@ -12,7 +12,7 @@ libstatusbar_FILES = libstatusbar.xm LibStatusBar8.mm \
 	UIStatusBarTimeItemView.xm
 
 libstatusbar_FRAMEWORKS = UIKit
-#libstatusbar_PRIVATE_FRAMEWORKS = AppSupport
+libstatusbar_PRIVATE_FRAMEWORKS = AppSupport
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
