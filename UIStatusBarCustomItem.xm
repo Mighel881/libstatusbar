@@ -60,7 +60,8 @@
 -(void) setProperties:(NSDictionary*)properties
 {
 	__strong NSDictionary* &_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
-	_properties = properties;
+	[_properties release];
+	_properties = [properties retain];
 }
 
 -(Class) viewClass
@@ -98,7 +99,8 @@
 -(void) setIndicatorName:(NSString*) name
 {
 	__strong NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
-	_indicatorName = name;
+	[_indicatorName release];
+	_indicatorName = [name retain];
 }
 
 %new
