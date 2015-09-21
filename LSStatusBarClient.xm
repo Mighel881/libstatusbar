@@ -63,10 +63,10 @@ extern "C" mach_port_t bootstrap_port;
 
 - (void) retrieveCurrentMessage
 {
-	_currentMessage = nil;
+	[_currentMessage release];
 	if(_isLocal)
 	{
-		_currentMessage = [[LSStatusBarServer sharedInstance] currentMessage];
+		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
 	}
 	else //if(LSBServerPort())
 	{
@@ -93,7 +93,7 @@ extern "C" mach_port_t bootstrap_port;
 		}
 
 		if (dmc)
-			_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
+			_currentMessage = [[dmc sendMessageAndReceiveReplyName: @"currentMessage" userInfo: nil] retain];
 	}
 }
 
@@ -115,7 +115,8 @@ extern "C" mach_port_t bootstrap_port;
 	
 	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 	
-	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
+	[_titleStrings release];
+	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 	
 	int keyidx = 32; //(cfvers >= CF_70) ? 32 : 24;
 
@@ -205,6 +206,8 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
+
+	[processedKeys release];
 	return YES;
 }
 
@@ -327,6 +330,8 @@ extern "C" mach_port_t bootstrap_port;
 			{
 				NSLog(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
 			}
+
+			[dict release];
 		}
 	}
 }
@@ -343,5 +348,7 @@ extern "C" mach_port_t bootstrap_port;
 	{
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
+
+	[messages release];
 }
 @end
