@@ -63,6 +63,12 @@ extern "C" mach_port_t bootstrap_port;
 
 - (void) retrieveCurrentMessage
 {
+	NSString *executableName = NSBundle.mainBundle.executablePath;
+	if ([executableName rangeOfString:@".appex"].location != NSNotFound)
+	{
+		NSLog(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
+	}
+
 	[_currentMessage release];
 	if(_isLocal)
 	{

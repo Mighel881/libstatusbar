@@ -15,7 +15,7 @@ NSMutableArray* customItems[3];	 // left, right, center
 {
 	id ret = %orig;
 	if (ret == nil)
-		ret = [[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
+		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
 	return ret;
 }
 
@@ -23,7 +23,7 @@ NSMutableArray* customItems[3];	 // left, right, center
 {
 	id ret = %orig;
 	if (ret == nil)
-		ret = [[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
+		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
 	return ret;
 }
 %end
