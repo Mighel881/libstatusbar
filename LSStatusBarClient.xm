@@ -124,7 +124,7 @@ extern "C" mach_port_t bootstrap_port;
 	[_titleStrings release];
 	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 	
-	int keyidx = 32; //(cfvers >= CF_70) ? 32 : 24;
+	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
 	extern NSMutableArray* customItems[3];
 	
