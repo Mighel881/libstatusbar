@@ -1,6 +1,7 @@
 ARCHS = armv7 armv7s arm64
 
 #TARGET=iphone:clang:8.1:7.0
+LDFLAGS += -Wl,-segalign,4000
 
 include $(THEOS)/makefiles/common.mk
 
