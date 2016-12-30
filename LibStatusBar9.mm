@@ -6,7 +6,7 @@ This is simply a dummy class that can be used to check for the existence of libs
 Protean, for one, uses it.
 */
 
-NSMutableArray *registeredExtensions = [[NSMutableArray array] retain];
+NSMutableArray *registeredExtensions = [NSMutableArray array];
 
 @interface LibStatusBar8 : NSObject
 + (BOOL)supported;

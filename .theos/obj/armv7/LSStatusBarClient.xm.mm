@@ -1,3 +1,4 @@
+#line 1 "LSStatusBarClient.xm"
 #import "LSStatusBarClient.h"
 #import "LSStatusBarServer.h"
 #import "UIStatusBarCustomItem.h"
@@ -9,12 +10,12 @@
 @end
 
 @interface SBBulletinListController
-- (SBBulletinListView*)listView;
+- (id)listView;
 @end
 
 @interface SBNotificationCenterController
 + (id)sharedInstanceIfExists;
-@property(readonly, assign, nonatomic) SBNotificationCenterViewController* viewController;
+@property(readonly, assign, nonatomic) UIViewController* viewController;
 @end
 
 void UpdateStatusBar(CFNotificationCenterRef center, LSStatusBarClient* client) {
@@ -29,6 +30,31 @@ void ResubmitContent(CFNotificationCenterRef center, LSStatusBarClient* client) 
 extern "C" kern_return_t bootstrap_look_up(mach_port_t bp, const char* service_name, mach_port_t *sp);
 extern "C" mach_port_t bootstrap_port;
 
+
+#include <substrate.h>
+#if defined(__clang__)
+#if __has_feature(objc_arc)
+#define _LOGOS_SELF_TYPE_NORMAL __unsafe_unretained
+#define _LOGOS_SELF_TYPE_INIT __attribute__((ns_consumed))
+#define _LOGOS_SELF_CONST const
+#define _LOGOS_RETURN_RETAINED __attribute__((ns_returns_retained))
+#else
+#define _LOGOS_SELF_TYPE_NORMAL
+#define _LOGOS_SELF_TYPE_INIT
+#define _LOGOS_SELF_CONST
+#define _LOGOS_RETURN_RETAINED
+#endif
+#else
+#define _LOGOS_SELF_TYPE_NORMAL
+#define _LOGOS_SELF_TYPE_INIT
+#define _LOGOS_SELF_CONST
+#define _LOGOS_RETURN_RETAINED
+#endif
+
+@class UIStatusBarItem; @class CPDistributedMessagingCenter; @class UIApplication; @class SpringBoard; @class SBNotificationCenterController; @class SBBulletinListController; 
+
+static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$UIStatusBarItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("UIStatusBarItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBNotificationCenterController(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBNotificationCenterController"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBBulletinListController(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBBulletinListController"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SpringBoard(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SpringBoard"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$UIApplication(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("UIApplication"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$CPDistributedMessagingCenter(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("CPDistributedMessagingCenter"); } return _klass; }
+#line 32 "LSStatusBarClient.xm"
 @implementation LSStatusBarClient
 + (id)sharedInstance {
 	static LSStatusBarClient* client;
@@ -42,7 +68,7 @@ extern "C" mach_port_t bootstrap_port;
 - (id)init {
 	self = [super init];
 	if (self) {
-		_isLocal = %c(SpringBoard) ? YES : NO;
+		_isLocal = _logos_static_class_lookup$SpringBoard() ? YES : NO;
 
 		CFNotificationCenterRef darwin = CFNotificationCenterGetDarwinNotifyCenter();
 		CFNotificationCenterAddObserver(darwin, (const void *)self, (CFNotificationCallback) UpdateStatusBar, CFSTR("libstatusbar_changed"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
@@ -58,7 +84,7 @@ extern "C" mach_port_t bootstrap_port;
 - (void)retrieveCurrentMessage {
 	NSString *executableName = NSBundle.mainBundle.executablePath;
 	if ([executableName rangeOfString:@".appex"].location != NSNotFound) {
-		HBLogDebug(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
+		NSLog(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
 	}
 
 	[_currentMessage release];
@@ -67,8 +93,8 @@ extern "C" mach_port_t bootstrap_port;
 	} else {
 		CPDistributedMessagingCenter* dmc = nil;
 
-		if (!dmc && %c(CPDistributedMessagingCenter) != nil) {
-			dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
+		if (!dmc && _logos_static_class_lookup$CPDistributedMessagingCenter() != nil) {
+			dmc = [_logos_static_class_lookup$CPDistributedMessagingCenter() centerNamed:@"com.apple.springboard.libstatusbar"];
 
 			void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
 			if (!rocketbootstrap_distributedmessagingcenter_apply) {
@@ -104,9 +130,9 @@ extern "C" mach_port_t bootstrap_port;
 	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
 	[_titleStrings release];
- 	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
+	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 
-	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
+	int keyidx = 64; 
 
 	extern NSMutableArray* customItems[3];
 
@@ -115,7 +141,7 @@ extern "C" mach_port_t bootstrap_port;
 			int cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
 				UIStatusBarCustomItem* item = [customItems[i] objectAtIndex: cnt];
-				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
+				
 
 				NSString* indicatorName = [item indicatorName];
 
@@ -147,10 +173,10 @@ extern "C" mach_port_t bootstrap_port;
 	if (processedKeys && [processedKeys count]) {
 		for (NSString* key in processedKeys) {
 			UIStatusBarCustomItem* item = nil;
-			if ([%c(UIStatusBarItem) respondsToSelector:@selector(itemWithType:idiom:)]) {
-				item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
+			if ([_logos_static_class_lookup$UIStatusBarItem() respondsToSelector:@selector(itemWithType:idiom:)]) {
+				item = [_logos_static_class_lookup$UIStatusBarItem() itemWithType:keyidx++ idiom:0];
 			} else {
-				item = [%c(UIStatusBarItem) itemWithType:keyidx++];
+				item = [_logos_static_class_lookup$UIStatusBarItem() itemWithType:keyidx++];
 			}
 			[item setIndicatorName: key];
 
@@ -175,21 +201,22 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
+
 	[processedKeys release];
 	return YES;
 }
 
 - (void)updateStatusBar {
-	if(!%c(UIApplication)) {
+	if(!_logos_static_class_lookup$UIApplication()) {
 		return;
 	}
 
 	[self retrieveCurrentMessage];
 
-	// need a decent guard band because we do call before UIApp exists
+	
 	if ([self processCurrentMessage]) {
-		if (%c(UIApplication) && [%c(UIApplication) sharedApplication]) {
-			UIStatusBar* sb = [[%c(UIApplication) sharedApplication] statusBar];
+		if (_logos_static_class_lookup$UIApplication() && [_logos_static_class_lookup$UIApplication() sharedApplication]) {
+			UIStatusBar* sb = [[_logos_static_class_lookup$UIApplication() sharedApplication] statusBar];
 
 			if(!sb) {
 				return;
@@ -197,28 +224,28 @@ extern "C" mach_port_t bootstrap_port;
 
 			UIStatusBarForegroundView* _foregroundView = MSHookIvar<UIStatusBarForegroundView*>(sb, "_foregroundView");
 			if (_foregroundView) {
-				[sb forceUpdateData:NO];
+				[sb forceUpdateData: NO];
 
 				if (_isLocal) {
-					if (%c(SBBulletinListController)) {
-						SBBulletinListView* listview = [[%c(SBBulletinListController) sharedInstance] listView];
-						if (listview) {
-							UIStatusBar* _statusBar = MSHookIvar<id>(listview, "_statusBar");
-							[_statusBar forceUpdateData:NO];
+					if (_logos_static_class_lookup$SBBulletinListController()) {
+						id listview = [[_logos_static_class_lookup$SBBulletinListController() sharedInstance] listView];
+						if(listview) {
+							id _statusBar = MSHookIvar<id>(listview, "_statusBar");
+							[_statusBar forceUpdateData: NO];
 						}
 					}
 
-					if (%c(SBNotificationCenterController)) {
-						SBNotificationCenterViewController *vc = [[%c(SBNotificationCenterController) sharedInstanceIfExists] viewController];
+					if (_logos_static_class_lookup$SBNotificationCenterController()) {
+						id vc = [[_logos_static_class_lookup$SBNotificationCenterController() sharedInstanceIfExists] viewController];
 						if (vc) {
-							UIStatusBar* _statusBar = MSHookIvar<id>(vc, "_statusBar");
+							id _statusBar = MSHookIvar<id>(vc, "_statusBar");
 
 							if (_statusBar) {
-								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
-								// bypass and directly do it.
+								
+								
 
 								void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
-								[_statusBar forceUpdateToData:&_currentRawData animated:NO];
+								[_statusBar forceUpdateToData: &_currentRawData animated: NO];
 							}
 						}
 					}
@@ -259,8 +286,8 @@ extern "C" mach_port_t bootstrap_port;
 				[dict setObject:bundleId forKey:@"bundle"];
 			}
 
-			if (%c(CPDistributedMessagingCenter)) {
-				CPDistributedMessagingCenter* dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
+			if (_logos_static_class_lookup$CPDistributedMessagingCenter()) {
+				CPDistributedMessagingCenter* dmc = [_logos_static_class_lookup$CPDistributedMessagingCenter() centerNamed:@"com.apple.springboard.libstatusbar"];
 
 				void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
 				if (!rocketbootstrap_distributedmessagingcenter_apply) {
@@ -276,8 +303,9 @@ extern "C" mach_port_t bootstrap_port;
 
 				[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
 			} else {
-				HBLogDebug(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
+				NSLog(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
 			}
+
 			[dict release];
 		}
 	}
@@ -293,6 +321,8 @@ extern "C" mach_port_t bootstrap_port;
 	for (NSString* key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
+
 	[messages release];
 }
 @end
+#line 302 "LSStatusBarClient.xm"

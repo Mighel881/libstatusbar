@@ -12,7 +12,7 @@
 #import <unistd.h>
 #import <objc/runtime.h>
 
-#import "CPDistributedMessagingCenter.h"
+#import <AppSupport/CPDistributedMessagingCenter.h>
 #import "UIApplication_libstatusbar.h"
 #import "headers.h"
 

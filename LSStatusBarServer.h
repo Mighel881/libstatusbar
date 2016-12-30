@@ -1,4 +1,4 @@
-#import "CPDistributedMessagingCenter.h"
+#import <AppSupport/CPDistributedMessagingCenter.h>
 
 @interface LSStatusBarServer : NSObject {
 	CPDistributedMessagingCenter *_dmc;

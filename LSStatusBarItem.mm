@@ -52,9 +52,9 @@ NSMutableDictionary* sbitems = nil;
 		idArray = [sbitems objectForKey:identifier];
 		if (!idArray) {
 			// this creates a retain/release-less NSMutableArray
-			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-			[sbitems setObject: idArray forKey: identifier];
-			CFRelease(idArray);
+ 			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
+ 			[sbitems setObject: idArray forKey: identifier];
+ 			CFRelease(idArray);
 		}
 
 		if (idArray) {
@@ -81,11 +81,9 @@ NSMutableDictionary* sbitems = nil;
 				[sbitems removeObjectForKey:_identifier];
 			}
 		}
-
 		[_identifier release];
-		[_properties release];
+ 		[_properties release];
 	}
-
 	[super dealloc];
 }
 

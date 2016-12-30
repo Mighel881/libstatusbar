@@ -679,3 +679,9 @@
 -(void)dealloc;
 -(id)init;
 @end
+
+@interface SBNotificationCenterViewController : UIViewController
+@end
+
+@interface SBBulletinListView : UIView
+@end
