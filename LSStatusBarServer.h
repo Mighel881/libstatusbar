@@ -1,34 +1,33 @@
 #import "CPDistributedMessagingCenter.h"
 
-@interface LSStatusBarServer : NSObject
-{
+@interface LSStatusBarServer : NSObject {
 	CPDistributedMessagingCenter *_dmc;
 	NSMutableDictionary* _currentMessage;
 	NSMutableArray* _currentKeys;
 	NSMutableDictionary* _currentKeyUsage;
-	
+
 	NSMutableArray* clientPids;
-	
-	
+
+
 	CFRunLoopTimerRef timer;
 	bool timeHidden;
 }
 
-+ (id) sharedInstance;
++ (id)sharedInstance;
 
-- (id) init;
+- (id)init;
 
-- (void) appDidExit: (NSString*) bundle;
+- (void)appDidExit: (NSString*) bundle;
 
-- (void) setProperties: (NSString*) message userInfo: (NSDictionary*) userInfo;
-- (void) setProperties: (id) properties forItem: (NSString*) item bundle: (NSString*) bundle pid: (NSNumber*) pid;
+- (void)setProperties: (NSString*) message userInfo: (NSDictionary*) userInfo;
+- (void)setProperties: (id) properties forItem: (NSString*) item bundle: (NSString*) bundle pid: (NSNumber*) pid;
 
-- (NSMutableDictionary*) currentMessage;
+- (NSMutableDictionary*)currentMessage;
 
-- (void) incrementTimer;
-- (void) updateLockStatus;
+- (void)incrementTimer;
+- (void)updateLockStatus;
 
-- (void) startTimer;
-- (void) stopTimer;
+- (void)startTimer;
+- (void)stopTimer;
 
 @end

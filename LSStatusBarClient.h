@@ -1,24 +1,23 @@
-@interface LSStatusBarClient : NSObject
-{
+@interface LSStatusBarClient : NSObject {
 	bool _isLocal;
 	NSDictionary* _currentMessage;
 	NSMutableDictionary* _submittedMessages;
-	
+
 	NSArray* _titleStrings;
 }
 
-+ (id) sharedInstance;
++ (id)sharedInstance;
 
-- (id) init;
+- (id)init;
 
-- (NSDictionary*) currentMessage;
-- (void) retrieveCurrentMessage;
+- (NSDictionary*)currentMessage;
+- (void)retrieveCurrentMessage;
 - (bool) processCurrentMessage;
-- (void) resubmitContent;
-- (void) updateStatusBar;
+- (void)resubmitContent;
+- (void)updateStatusBar;
 
-- (void) setProperties:(id)properties forItem:(NSString*)item;
+- (void)setProperties:(id)properties forItem:(NSString*)item;
 
-- (NSString*) titleStringAtIndex:(int)idx;
+- (NSString*)titleStringAtIndex:(int)idx;
 
 @end

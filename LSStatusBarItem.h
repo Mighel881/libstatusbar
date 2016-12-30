@@ -1,5 +1,4 @@
-enum StatusBarAlignment
-{
+enum StatusBarAlignment {
 	StatusBarAlignmentLeft = 1,
 	StatusBarAlignmentRight = 2,
 	StatusBarAlignmentCenter = 4
@@ -8,8 +7,7 @@ enum StatusBarAlignment
 
 // only LSStatusBarItem (API) methods are considered public.
 
-@interface LSStatusBarItem : NSObject
-{
+@interface LSStatusBarItem : NSObject {
 @private
 	NSString* _identifier;
 	NSMutableDictionary* _properties;
@@ -24,7 +22,7 @@ enum StatusBarAlignment
 
 @interface LSStatusBarItem (API)
 
-- (id) initWithIdentifier: (NSString*) identifier alignment: (StatusBarAlignment) alignment;
+- (id)initWithIdentifier:(NSString*)identifier alignment:(StatusBarAlignment)alignment;
 
 // bitmasks (e.g. left or right) are not supported yet
 @property (nonatomic, readonly) StatusBarAlignment alignment;
@@ -45,7 +43,7 @@ enum StatusBarAlignment
 @property (nonatomic, getter=isManualUpdate) BOOL manualUpdate;
 
 // manually call if manualUpdate = YES
-- (void) update;
+- (void)update;
 
 @end
 
@@ -63,16 +61,16 @@ enum StatusBarAlignment
 //@property (getter=isCurrentAppOnly) BOOL currentAppOnly;
 
 // delegate must respond to @selector(statusBarAction:); only valid from inside of SpringBoard
-- (void) addTouchDelegate: (id) delegate;
-- (void) removeTouchDelegate: (id) delegate;
+- (void)addTouchDelegate: (id) delegate;
+- (void)removeTouchDelegate: (id) delegate;
 
 
 @end
 
 
 @interface LSStatusBarItem (Private)
- 
-+ (void) _updateProperties: (NSMutableDictionary*) properties forIdentifier: (NSString*) identifier;
-- (void) _setProperties: (NSDictionary*) dict;
+
++ (void)_updateProperties: (NSMutableDictionary*) properties forIdentifier: (NSString*) identifier;
+- (void)_setProperties: (NSDictionary*) dict;
 
 @end

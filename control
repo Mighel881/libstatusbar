@@ -1,13 +1,12 @@
-Package: libstatusbar8
-Name: libstatusbar (efrederickson)
+Package: libstatusbar9
+Name: libstatusbar (Shade Zepheri)
 Provides: libstatusbar
 Replaces: libstatusbar
 Conflicts: libstatusbar
 Depends: mobilesubstrate
-Version: 1337
+Version: 0.5
 Architecture: iphoneos-arm
 Description: Improved libstatusbar
-Depiction: http://elijahandandrew.com/repo/depictions/Libstatusbar/
-Maintainer: Elijah Frederickson <elijah.frederickson@gmail.com>
-Author: phoenix3200 & Elijah Frederickson <elijah.frederickson@gmail.com>
+Maintainer: Shade Zepheri <ziroalpha@gmail.com>
+Author: phoenix3200 & Elijah Frederickson & Shade Zepheri <ziroalpha@gmail.com>
 Section: Tweaks

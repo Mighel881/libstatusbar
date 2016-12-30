@@ -1,16 +1,13 @@
+TARGET = iphone:9.2
 ARCHS = armv7 armv7s arm64
 
 #TARGET=iphone:clang:8.1:7.0
-LDFLAGS += -Wl,-segalign,4000
+CFLAGS = -O2
 
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = libstatusbar
-libstatusbar_FILES = libstatusbar.xm LibStatusBar8.mm \
-	LSStatusBarItem.mm LSStatusBarClient.xm LSStatusBarServer.mm \
-	UIStatusBarCustomItem.xm UIStatusBarCustomItemView.xm \
-	UIStatusBarTimeItemView.xm
-
+libstatusbar_FILES = $(wildcard *.xm) $(wildcard *.mm)
 libstatusbar_FRAMEWORKS = UIKit
 libstatusbar_PRIVATE_FRAMEWORKS = AppSupport
 

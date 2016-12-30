@@ -1,8 +1,8 @@
-This is a fork of libstatusbar. 
+This is a fork of Elijah Frederickson fork libstatusbar.
 
 It contains some improvements and fixes including:
 - Updated to use Logos (and many other syntax enhancements)
-- Updated to use ARC
+- Updated to use ARC* (Not Yet)
 - Only hooks into UIKit processes using the MobileSubstrate filter
 - Fix enumeration crash
 - Allows icons in the center
@@ -13,3 +13,5 @@ It contains some improvements and fixes including:
 Negative changes:
 - Dropped armv6 support (because I don't have the SDKs for it)
 - (May have) dropped <iOS 7 support
+
+Dont Even know if this properly supports iOS 9.3 or 10.X but sure

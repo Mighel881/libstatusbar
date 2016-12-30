@@ -8,8 +8,7 @@
 
 @class NSLock, NSMutableDictionary, NSString;
 
-@interface CPDistributedMessagingCenter : NSObject
-{
+@interface CPDistributedMessagingCenter : NSObject {
     NSString *_name;
     NSLock *_lock;
     unsigned int _sendPort;
@@ -34,4 +33,3 @@
 - (BOOL)isTaskEntitled:(id *)fp8;
 
 @end
-
