@@ -27,7 +27,7 @@ NSMutableDictionary* sbitems = nil;
 
 	if ((self = [super init])) {
 
-		if(!sbitems) {
+		if (!sbitems) {
 			sbitems = [NSMutableDictionary new];
 		}
 

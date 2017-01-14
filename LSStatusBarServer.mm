@@ -10,7 +10,7 @@ void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer* server)
 }
 
 void incrementTimer() {
-	[[LSStatusBarServer sharedInstance] incrementTimer];
+	[LSStatusBarServer.sharedInstance incrementTimer];
 }
 
 @implementation LSStatusBarServer
@@ -27,15 +27,12 @@ void incrementTimer() {
 	self = [super init];
 	if (self) {
 		_dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+		rocketbootstrap_distributedmessagingcenter_apply(_dmc);
 
-		if (_dmc) {
-			rocketbootstrap_distributedmessagingcenter_apply(_dmc);
+		[_dmc runServerOnCurrentThread];
+		[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
+		[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
 
-			[_dmc runServerOnCurrentThread];
-			[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
-			[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
-			HBLogDebug(@"[libstatusbar] server running in process without AppSupport/CPDistributedMessagingCenter");
-		}
 		_currentMessage = [[NSMutableDictionary alloc] init];
 		_currentKeys = [[NSMutableArray alloc] init];
 		_currentKeyUsage = [[NSMutableDictionary alloc] init];
@@ -115,7 +112,6 @@ static void NoteExitKQueueCallback(
 
 
 void MonitorPID(NSNumber* pid) {
-    //FILE *                f;
     NSInteger                     kq;
     struct kevent           changes;
 		CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
@@ -228,7 +224,7 @@ void MonitorPID(NSNumber* pid) {
 - (void)appDidExit:(NSString*)bundle {
 	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
-		NSString* item = [_currentKeys objectAtIndex: i];
+		NSString* item = [_currentKeys objectAtIndex:i];
 
 		NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
 		if (!pids) {
@@ -302,13 +298,8 @@ void MonitorPID(NSNumber* pid) {
 		if (titleStrings && [titleStrings count]) {
 			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 			CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
-
-			{
-				[self setState: 0];
-
-				[self enqueuePostChanged];
-			}
-
+			[self setState: 0];
+			[self enqueuePostChanged];
 		}
 	}
 }

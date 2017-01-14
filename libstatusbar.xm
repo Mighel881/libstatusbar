@@ -71,13 +71,13 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 
 	__strong UIStatusBarLayoutManager* (&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
 
-	CGFloat boundsWidth = [self bounds].size.width;
+	CGFloat boundsWidth = self.bounds.size.width;
 	NSMutableArray* center = [ret objectForKey:@(2)];
 	CGFloat centerWidth = [layoutManagers[2] sizeNeededForItems:center];
 
 	CGFloat edgeWidth = (boundsWidth - centerWidth) * 0.5f;
 
-	for (int i = 0; i <= 2; i++) {
+	for (int i = 0; i < 2; i++) {
 		NSMutableArray* arr = [ret objectForKey:@(i)];
 
 		[layoutManagers[i] clearOverlapFromItems:arr];
@@ -153,7 +153,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 			}*/
 
 			// lol lets hope this works
-			view.visible = YES;
+			view.visible = NO;
 			//NSString *exclusiveToApp = [view.item isKindOfClass:[%c(UIStatusBarCustomItem)]] ? [[view.item properties] objectForKey:@"exclusiveToApp"] : nil;
 			//if (!exclusiveToApp || [NSBundle.mainBundle.bundleIdentifier isEqualToString:exclusiveToApp])
 			//	view.visible = NO;
