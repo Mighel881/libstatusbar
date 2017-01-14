@@ -1,4 +1,4 @@
-enum StatusBarAlignment {
+typedef NS_ENUM(NSInteger, StatusBarAlignment) {
 	StatusBarAlignmentLeft = 1,
 	StatusBarAlignmentRight = 2,
 	StatusBarAlignmentCenter = 4
@@ -61,8 +61,8 @@ enum StatusBarAlignment {
 //@property (getter=isCurrentAppOnly) BOOL currentAppOnly;
 
 // delegate must respond to @selector(statusBarAction:); only valid from inside of SpringBoard
-- (void)addTouchDelegate: (id) delegate;
-- (void)removeTouchDelegate: (id) delegate;
+- (void)addTouchDelegate:(id)delegate;
+- (void)removeTouchDelegate:(id)delegate;
 
 
 @end
@@ -70,7 +70,7 @@ enum StatusBarAlignment {
 
 @interface LSStatusBarItem (Private)
 
-+ (void)_updateProperties: (NSMutableDictionary*) properties forIdentifier: (NSString*) identifier;
-- (void)_setProperties: (NSDictionary*) dict;
++ (void)_updateProperties:(NSMutableDictionary*)properties forIdentifier:(NSString*)identifier;
+- (void)_setProperties:(NSDictionary*)dict;
 
 @end

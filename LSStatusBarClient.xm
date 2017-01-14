@@ -61,9 +61,9 @@ extern "C" mach_port_t bootstrap_port;
 		HBLogDebug(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
 	}
 
-	[_currentMessage release];
+	_currentMessage = nil;
 	if (_isLocal) {
-		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
+		_currentMessage = [[LSStatusBarServer sharedInstance] currentMessage];
 	} else {
 		CPDistributedMessagingCenter* dmc = nil;
 
@@ -84,7 +84,7 @@ extern "C" mach_port_t bootstrap_port;
 		}
 
 		if (dmc) {
-			_currentMessage = [[dmc sendMessageAndReceiveReplyName: @"currentMessage" userInfo: nil] retain];
+			_currentMessage = [dmc sendMessageAndReceiveReplyName: @"currentMessage" userInfo: nil];
 		}
 	}
 }
@@ -103,8 +103,7 @@ extern "C" mach_port_t bootstrap_port;
 
 	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
-	[_titleStrings release];
- 	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
+	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
 	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
@@ -175,7 +174,6 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
-	[processedKeys release];
 	return YES;
 }
 
@@ -278,7 +276,6 @@ extern "C" mach_port_t bootstrap_port;
 			} else {
 				HBLogDebug(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
 			}
-			[dict release];
 		}
 	}
 }
@@ -293,6 +290,5 @@ extern "C" mach_port_t bootstrap_port;
 	for (NSString* key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
-	[messages release];
 }
 @end

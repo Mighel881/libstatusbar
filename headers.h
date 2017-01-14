@@ -15,10 +15,10 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface SBLockStateAggregator
-+(id)sharedInstance;
--(void)_updateLockState;
--(BOOL)hasAnyLockState;
--(unsigned)lockState;
++ (id)sharedInstance;
+- (void)_updateLockState;
+- (BOOL)hasAnyLockState;
+- (unsigned)lockState;
 @end
 
 @interface SBIconModel (iOS81)

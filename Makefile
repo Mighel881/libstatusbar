@@ -1,8 +1,7 @@
 TARGET = iphone:9.2
 ARCHS = armv7 arm64
 
-#TARGET=iphone:clang:8.1:7.0
-CFLAGS = -O2
+CFLAGS = -O2 -fobjc-arc
 
 include $(THEOS)/makefiles/common.mk
 

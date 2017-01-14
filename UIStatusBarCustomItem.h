@@ -6,7 +6,7 @@
 - (void)setView:(UIStatusBarItemView*)view forManager:(id)manager;
 - (void)removeAllViews;
 
-- (void)setIndicatorName: (NSString*) name;
+- (void)setIndicatorName:(NSString*)name;
 
 @property (nonatomic, retain) NSDictionary* properties;
 @end

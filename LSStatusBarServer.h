@@ -13,14 +13,14 @@
 	bool timeHidden;
 }
 
-+ (id)sharedInstance;
++ (instancetype)sharedInstance;
 
 - (id)init;
 
-- (void)appDidExit: (NSString*) bundle;
+- (void)appDidExit:(NSString*)bundle;
 
-- (void)setProperties: (NSString*) message userInfo: (NSDictionary*) userInfo;
-- (void)setProperties: (id) properties forItem: (NSString*) item bundle: (NSString*) bundle pid: (NSNumber*) pid;
+- (void)setProperties:(NSString*)message userInfo: (NSDictionary*)userInfo;
+- (void)setProperties:(id)properties forItem:(NSString*)item bundle:(NSString*)bundle pid:(NSNumber*)pid;
 
 - (NSMutableDictionary*)currentMessage;
 

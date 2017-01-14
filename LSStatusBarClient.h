@@ -6,7 +6,7 @@
 	NSArray* _titleStrings;
 }
 
-+ (id)sharedInstance;
++ (instancetype)sharedInstance;
 
 - (id)init;
 

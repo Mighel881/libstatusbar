@@ -24,7 +24,7 @@
 
 //extern "C" int SBSSpringBoardServerPort();
 
-enum sandbox_filter_type {
+typedef NS_ENUM(NSInteger, sandbox_filter_type) {
 	SANDBOX_FILTER_NONE = 0,
 	SANDBOX_FILTER_PATH = 1,
 	SANDBOX_FILTER_GLOBAL_NAME = 2,
@@ -32,4 +32,4 @@ enum sandbox_filter_type {
 	SANDBOX_CHECK_NO_REPORT = 0x40000000
 };
 
-extern "C" int sandbox_check(pid_t pid, const char *operation, enum sandbox_filter_type type, ...);
+extern "C" int sandbox_check(pid_t pid, const char *operation, sandbox_filter_type type, ...);
