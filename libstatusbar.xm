@@ -161,7 +161,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 			//[view setFrame:(CGRect){{startPosition, 0.0f}, [self _frameForItemView:view startPosition:startPosition firstView:YES].size}];
 			view.frame = [self _frameForItemView:view startPosition:startPosition firstView:YES];
 
-			[_foregroundView addSubview: view];
+			[_foregroundView addSubview:view];
 		}
 
 		NSInteger type = view.item.type;
@@ -240,7 +240,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 	// UIKit should still not exist.../yet/
 	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
-		[[LSStatusBarClient sharedInstance] updateStatusBar];
+		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}
 }
 
@@ -249,7 +249,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 
 	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
-		[[LSStatusBarClient sharedInstance] updateStatusBar];
+		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}
 }
 
@@ -258,20 +258,20 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 
 	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
-		[[LSStatusBarClient sharedInstance] updateStatusBar];
+		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}
 }
 
 %new - (void)addStatusBarImageNamed:(NSString*)name removeOnExit:(BOOL)remove {
-	[[LSStatusBarClient sharedInstance] setProperties:@(1) forItem:name];
+	[LSStatusBarClient.sharedInstance setProperties:@(1) forItem:name];
 }
 
 %new - (void)addStatusBarImageNamed:(NSString*)name {
-	[[LSStatusBarClient sharedInstance] setProperties:@(1) forItem:name];
+	[LSStatusBarClient.sharedInstance setProperties:@(1) forItem:name];
 }
 
 %new - (void)removeStatusBarImageNamed:(NSString*)name {
-	[[LSStatusBarClient sharedInstance] setProperties:nil forItem:name];
+	[LSStatusBarClient.sharedInstance setProperties:nil forItem:name];
 }
 %end
 

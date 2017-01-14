@@ -1,0 +1,9 @@
+cycript -p SpringBoard
+
+var sbac = objc_getClass("SBApplicationController")
+var mApp = [[sbac sharedInstance] applicationWithBundleIdentifier:@"com.apple.MobileSMS"]
+var mIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:mApp]
+var c = 100
+for(var i = 0; i < c; i++) {if (i == (c - 1)) {[mIcon setBadge:20];} else {[mIcon setBadge:i];}}
+
+[mIcon setBadge:0]

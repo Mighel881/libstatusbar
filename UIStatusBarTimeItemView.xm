@@ -10,10 +10,10 @@
 	__strong NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
 	NSString *oldString = _timeString;
 
-	NSInteger idx = [[[LSStatusBarClient sharedInstance] currentMessage][@"TitleStringIndex"] intValue];
+	NSInteger idx = [[LSStatusBarClient.sharedInstance currentMessage][@"TitleStringIndex"] intValue];
 
 	// Fetch current string
-	_timeString = [[LSStatusBarClient sharedInstance] titleStringAtIndex:idx];
+	_timeString = [LSStatusBarClient.sharedInstance titleStringAtIndex:idx];
 
 	// If not...
 	if (!_timeString) {
@@ -36,9 +36,9 @@
 
 	// ellipsize strings if they're too long
 	if ([timeString sizeWithAttributes:@{NSFontAttributeName:[self textFont]}].width > maxlen) {
-		[timeString replaceCharactersInRange: (NSRange){[timeString length]-1, 1} withString: @"…"];
+		[timeString replaceCharactersInRange:(NSRange){[timeString length]-1, 1} withString:@"…"];
 		while ([timeString length]>3 && [timeString sizeWithAttributes:@{NSFontAttributeName:[self textFont]}].width > maxlen) {
-			[timeString replaceCharactersInRange: (NSRange){[timeString length]-2, 1} withString: @""];
+			[timeString replaceCharactersInRange:(NSRange){[timeString length]-2, 1} withString:@""];
 		}
 	}
 

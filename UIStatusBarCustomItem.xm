@@ -86,7 +86,7 @@
 - (UIStatusBarItemView*)viewForManager:(UIStatusBarLayoutManager*)manager {
 	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 	if (_views) {
-		return (UIStatusBarItemView*) CFDictionaryGetValue(_views, (void*) manager);
+		return (UIStatusBarItemView*)CFDictionaryGetValue(_views, (void*) manager);
 	} else {
 		return nil;
 	}
@@ -95,14 +95,14 @@
 %new
 - (void)setView:(UIStatusBarItemView*)view forManager:(UIStatusBarLayoutManager*)manager {
 	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
-	if(!_views) {
+	if (!_views) {
 		_views = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 	}
 	CFDictionarySetValue(_views, (void*) manager, (const void *)view);
 }
 
 void UIStatusBarCustomItem$removeFromSuperview(id key, UIView* view) {
-	if(view) {
+	if (view) {
 		[view removeFromSuperview];
 	}
 }
@@ -111,7 +111,7 @@ void UIStatusBarCustomItem$removeFromSuperview(id key, UIView* view) {
 - (void)removeAllViews {
 	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 
-	if(_views) {
+	if (_views) {
 		CFDictionaryApplyFunction(_views, (CFDictionaryApplierFunction) UIStatusBarCustomItem$removeFromSuperview, NULL);
 	}
 }

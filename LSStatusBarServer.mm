@@ -60,7 +60,7 @@ void incrementTimer() {
 	NSRunLoop* loop = [NSRunLoop mainRunLoop];
 
 	[loop cancelPerformSelector:@selector(postChanged) target:self argument:nil];
-	[loop performSelector: @selector(postChanged) target:self argument:nil order:0 modes:@[NSDefaultRunLoopMode]];
+	[loop performSelector:@selector(postChanged) target:self argument:nil order:0 modes:@[NSDefaultRunLoopMode]];
 }
 
 - (void)processMessageCommonWithFocus:(NSString*)item {
@@ -110,7 +110,7 @@ static void NoteExitKQueueCallback(
     CFOptionFlags       callBackTypes,
     NSNumber *              pidinfo
 ) {
-	  [[LSStatusBarServer sharedInstance] pidDidExit:pidinfo];
+	  [LSStatusBarServer.sharedInstance pidDidExit:pidinfo];
 }
 
 
@@ -144,8 +144,8 @@ void MonitorPID(NSNumber* pid) {
 	if (!clientPids) {
 		clientPids = [[NSMutableArray alloc] init];
 	}
-	if (![clientPids containsObject: thepid]) {
-		[clientPids addObject: thepid];
+	if (![clientPids containsObject:thepid]) {
+		[clientPids addObject:thepid];
 		MonitorPID(thepid);
 	}
 }
@@ -160,48 +160,48 @@ void MonitorPID(NSNumber* pid) {
 
 	// get the current item usage by bundles
 
-	NSMutableArray* pids = [_currentKeyUsage objectForKey: item];
+	NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
 	if (!pids) {
 		pids = [NSMutableArray array];
-		[_currentKeyUsage setObject: pids forKey: item];
+		[_currentKeyUsage setObject:pids forKey:item];
 	}
 
-	NSUInteger itemIdx = [_currentKeys indexOfObject: item];
+	NSUInteger itemIdx = [_currentKeys indexOfObject:item];
 
 
 	if (properties) {
-		[_currentMessage setValue: properties forKey: item];
+		[_currentMessage setValue:properties forKey:item];
 
-		if (![pids containsObject: pid]) {
-			[pids addObject: pid];
+		if (![pids containsObject:pid]) {
+			[pids addObject:pid];
 		}
 
 		if (itemIdx == NSNotFound) {
-			[_currentKeys addObject: item];
+			[_currentKeys addObject:item];
 		}
 	} else {
-		[pids removeObject: pid];
+		[pids removeObject:pid];
 
-		if([pids count]==0) {
+		if ([pids count]==0) {
 			// object is truly dead
-			[_currentMessage setValue: nil forKey: item];
+			[_currentMessage setValue:nil forKey:item];
 
-			if(itemIdx!=NSNotFound) {
-				[_currentKeys removeObjectAtIndex: itemIdx];
+			if (itemIdx!=NSNotFound) {
+				[_currentKeys removeObjectAtIndex:itemIdx];
 			}
 		}
 	}
 
 	// find all title strings
-	[self processMessageCommonWithFocus: item];
+	[self processMessageCommonWithFocus:item];
 }
 
 - (void)pidDidExit:(NSNumber*)pid {
 	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
-		NSString* item = [_currentKeys objectAtIndex: i];
+		NSString* item = [_currentKeys objectAtIndex:i];
 
-		NSMutableArray* pids = [_currentKeyUsage objectForKey: item];
+		NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
 		if (!pids) {
 			continue;
 		}
@@ -212,17 +212,17 @@ void MonitorPID(NSNumber* pid) {
 
 			if ([pids count]==0) {
 				// object is truly dead
-				[_currentMessage setValue: nil forKey: item];
+				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIdx = [_currentKeys indexOfObject: item];
+				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
 				if (itemIdx!=NSNotFound) {
-					[_currentKeys removeObjectAtIndex: itemIdx];
+					[_currentKeys removeObjectAtIndex:itemIdx];
 				}
 			}
 		}
 	}
 
-	[self processMessageCommonWithFocus: nil];
+	[self processMessageCommonWithFocus:nil];
 }
 
 - (void)appDidExit:(NSString*)bundle {
@@ -255,12 +255,12 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)setProperties:(NSString*)message userInfo:(NSDictionary*)userInfo {
-	NSString* item = [userInfo objectForKey: @"item"];
-	NSDictionary* properties = [userInfo objectForKey: @"properties"];
-	NSString* bundleId = [userInfo objectForKey: @"bundle"];
-	NSNumber* pid = [userInfo objectForKey: @"pid"];
+	NSString* item = [userInfo objectForKey:@"item"];
+	NSDictionary* properties = [userInfo objectForKey:@"properties"];
+	NSString* bundleId = [userInfo objectForKey:@"bundle"];
+	NSNumber* pid = [userInfo objectForKey:@"pid"];
 
-	[self setProperties: properties forItem: item bundle: bundleId pid: pid];
+	[self setProperties:properties forItem:item bundle:bundleId pid:pid];
 }
 
 - (void)setState:(NSUInteger)newState {
@@ -331,7 +331,7 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)incrementTimer {
-	NSArray* titleStrings = [_currentMessage objectForKey: @"titleStrings"];
+	NSArray* titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
 	if (titleStrings && [titleStrings count]) {
 		NSInteger value = TitleStringIndex; // -1 ++ = 0. so it should work

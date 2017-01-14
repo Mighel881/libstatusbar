@@ -31,7 +31,6 @@ NSMutableDictionary* sbitems = nil;
 			sbitems = [NSMutableDictionary new];
 		}
 
-
 		NSMutableArray* idArray = [sbitems objectForKey:identifier];
 		LSStatusBarItem* item = idArray ? [idArray count] ? [idArray objectAtIndex: 0] : nil : nil;
 		NSMutableDictionary* properties = item ? (NSMutableDictionary*)[item properties] : nil;
@@ -40,13 +39,13 @@ NSMutableDictionary* sbitems = nil;
 		}
 		_identifier = identifier;
 
-		[self _setProperties: properties];
+		[self _setProperties:properties];
 
-		NSNumber* align = [_properties objectForKey: @"alignment"];
+		NSNumber* align = [_properties objectForKey:@"alignment"];
 		if (!align) {
-			[_properties setObject: [NSNumber numberWithInt: alignment] forKey: @"alignment"];
+			[_properties setObject:[NSNumber numberWithInt:alignment] forKey:@"alignment"];
 		} else if ([align intValue] != alignment) {
-			[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: You cannot specify a new alignment!"];
+			[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: You cannot specify a new alignment!"];
 		}
 
 		idArray = [sbitems objectForKey:identifier];
@@ -74,7 +73,7 @@ NSMutableDictionary* sbitems = nil;
 
 			if ([idArray count] == 0) {
 				// item is no longer in use by this process, let the server know
-				[[LSStatusBarClient sharedInstance] setProperties:nil forItem:_identifier];
+				[LSStatusBarClient.sharedInstance setProperties:nil forItem:_identifier];
 				[sbitems removeObjectForKey:_identifier];
 			}
 		}
@@ -103,12 +102,12 @@ NSMutableDictionary* sbitems = nil;
 
 
 - (StatusBarAlignment)alignment {
-	NSNumber* alignment = [_properties objectForKey: @"alignment"];
+	NSNumber* alignment = [_properties objectForKey:@"alignment"];
 	return alignment ? (StatusBarAlignment) [alignment intValue] : StatusBarAlignmentLeft;
 }
 
 - (void) setVisible:(BOOL)visible {
-	[_properties setObject: [NSNumber numberWithBool: visible] forKey: @"visible"];
+	[_properties setObject:[NSNumber numberWithBool:visible] forKey:@"visible"];
 
 	if (!_manualUpdate) {
 		[self update];
@@ -116,14 +115,14 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (BOOL)isVisible {
-	NSNumber* visible = [_properties objectForKey: @"visible"];
+	NSNumber* visible = [_properties objectForKey:@"visible"];
 	return visible ? [visible boolValue] : YES;
 }
 
 - (void) setHidesTime:(BOOL)hidesTime {
-	NSNumber* oldTime = [_properties objectForKey: @"imageName"];
+	NSNumber* oldTime = [_properties objectForKey:@"imageName"];
 	if ([oldTime boolValue] != hidesTime) {
-		[_properties setObject: [NSNumber numberWithBool: hidesTime] forKey: @"hidesTime"];
+		[_properties setObject:[NSNumber numberWithBool:hidesTime] forKey:@"hidesTime"];
 
 		if (!_manualUpdate) {
 			[self update];
@@ -132,7 +131,7 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (BOOL)hidesTime {
-	NSNumber* hidesTime = [_properties objectForKey: @"hidesTime"];
+	NSNumber* hidesTime = [_properties objectForKey:@"hidesTime"];
 	return hidesTime ? [hidesTime boolValue] : NO;
 }
 
@@ -142,10 +141,10 @@ NSMutableDictionary* sbitems = nil;
 		//[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Cannot use images with a center alignment"];
 	}
 
-	NSString* oldImageName = [_properties objectForKey: @"imageName"];
+	NSString* oldImageName = [_properties objectForKey:@"imageName"];
 
-	if (!oldImageName || ![oldImageName isEqualToString: imageName]) {
-		[_properties setValue: imageName forKey: @"imageName"];
+	if (!oldImageName || ![oldImageName isEqualToString:imageName]) {
+		[_properties setValue:imageName forKey:@"imageName"];
 
 		if (!_manualUpdate) {
 			[self update];
@@ -154,20 +153,20 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (NSString*)imageName {
-	return [_properties objectForKey: @"imageName"];
+	return [_properties objectForKey:@"imageName"];
 }
 
 - (void)setTitleString:(NSString*)string {
 	if (self.alignment & (StatusBarAlignmentLeft | StatusBarAlignmentRight)) {
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Cannot use a title string with a side alignment"];
+		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Cannot use a title string with a side alignment"];
 	}
 
 	NSString* oldTitle = [_properties objectForKey: @"titleString"];
 
-	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString: string])) {
+	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString:string])) {
 		//HBLogDebug(@"oldTitle = %@, newTitle = %@", oldTitle, string);
 
-		[_properties setValue: string forKey: @"titleString"];
+		[_properties setValue:string forKey:@"titleString"];
 
 		if (!_manualUpdate) {
 			[self update];
@@ -176,12 +175,12 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (void)setCustomViewClass:(NSString*)customViewClass {
-	NSString* oldClass = [_properties objectForKey: @"customViewClass"];
+	NSString* oldClass = [_properties objectForKey:@"customViewClass"];
 
 	if (oldClass) {
-		[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Item already has a custom view class!"];
+		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Item already has a custom view class!"];
 	}
-	[_properties setValue: customViewClass forKey: @"customViewClass"];
+	[_properties setValue:customViewClass forKey:@"customViewClass"];
 
 	if (!_manualUpdate) {
 		[self update];
@@ -189,11 +188,11 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (NSString*)customViewClass {
-	return [_properties objectForKey: @"customViewClass"];
+	return [_properties objectForKey:@"customViewClass"];
 }
 
 - (NSString*)titleString {
-	return [_properties objectForKey: @"titleString"];
+	return [_properties objectForKey:@"titleString"];
 }
 
 
@@ -206,22 +205,22 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (void)update {
-	[[LSStatusBarClient sharedInstance] setProperties: _properties forItem: _identifier];
-	[LSStatusBarItem _updateProperties: _properties forIdentifier: _identifier];
+	[LSStatusBarClient.sharedInstance setProperties:_properties forItem:_identifier];
+	[LSStatusBarItem _updateProperties:_properties forIdentifier:_identifier];
 }
 
 // future API
 
 - (void)setExclusiveToApp:(NSString*)bundleId {
-	[_properties setObject: bundleId forKey: @"exclusiveToApp"];
+	[_properties setObject:bundleId forKey:@"exclusiveToApp"];
 
-	if(!_manualUpdate) {
+	if (!_manualUpdate) {
 		[self update];
 	}
 }
 
 - (NSString*)exclusiveToApp {
-	return [_properties objectForKey: @"exclusiveToApp"];
+	return [_properties objectForKey:@"exclusiveToApp"];
 }
 
 - (void)addTouchDelegate:(id)delegate {

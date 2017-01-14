@@ -40,14 +40,14 @@
 - (BOOL) hideSheet;
 @end
 
-@interface UIStatusBarForegroundStyle : NSObject
-- (UIColor*) tintColor;
-- (NSString*) expandedNameForImageName: (NSString*) imageName;
-- (UIImage*) shadowImageForImage: (UIImage*) img withIdentifier: (NSString*) id forStyle: (int) style withStrength: (float) strength cachesImage: (bool) cache;
+@interface UIStatusBarForegroundStyleAttributes : NSObject
+- (UIColor*)tintColor;
+- (NSString*)expandedNameForImageName: (NSString*) imageName;
+- (UIImage*)shadowImageForImage: (UIImage*) img withIdentifier: (NSString*) id forStyle: (int) style withStrength: (float) strength cachesImage: (bool) cache;
 @end
 
 @interface UIStatusBarForegroundView : UIView
--(UIStatusBarForegroundStyle*)foregroundStyle;
+- (UIStatusBarForegroundStyleAttributes*)foregroundStyle;
 @end
 
 @interface UIColor (Protean)
@@ -491,8 +491,7 @@
 - (id)initWithDefaultSize;
 @end
 
-@interface UIStatusBarItem : NSObject
-{
+@interface UIStatusBarItem : NSObject {
     long long _idiom;
     int _type;
 }
@@ -604,7 +603,7 @@
 - (void)dealloc;
 - (id)initWithItem:(id)arg1 data:(id)arg2 actions:(int)arg3 style:(id)arg4;
 - (_Bool)_shouldAnimatePropertyWithKey:(id)arg1;
-- (UIStatusBarForegroundStyle*)foregroundStyle;
+- (UIStatusBarForegroundStyleAttributes*)foregroundStyle;
 @end
 
 @interface BBServer (Protean)

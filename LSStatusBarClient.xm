@@ -64,7 +64,7 @@ extern "C" mach_port_t bootstrap_port;
 
 	_currentMessage = nil;
 	if (_isLocal) {
-		_currentMessage = [[LSStatusBarServer sharedInstance] currentMessage];
+		_currentMessage = [LSStatusBarServer.sharedInstance currentMessage];
 	} else {
 		CPDistributedMessagingCenter* dmc = nil;
 
@@ -74,7 +74,7 @@ extern "C" mach_port_t bootstrap_port;
 		}
 
 		if (dmc) {
-			_currentMessage = [dmc sendMessageAndReceiveReplyName: @"currentMessage" userInfo: nil];
+			_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
 		}
 	}
 }
@@ -86,7 +86,7 @@ extern "C" mach_port_t bootstrap_port;
 	return nil;
 }
 
-- (bool)processCurrentMessage {
+- (BOOL)processCurrentMessage {
 	if (!_currentMessage) {
 		return NO;
 	}
@@ -103,27 +103,27 @@ extern "C" mach_port_t bootstrap_port;
 		if (customItems[i]) {
 			NSInteger cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
-				UIStatusBarCustomItem* item = [customItems[i] objectAtIndex: cnt];
+				UIStatusBarCustomItem* item = [customItems[i] objectAtIndex:cnt];
 				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
 
 				NSString* indicatorName = [item indicatorName];
 
 				NSObject* properties = nil;
 				if (_currentMessage) {
-					properties = [_currentMessage objectForKey: indicatorName];
+					properties = [_currentMessage objectForKey:indicatorName];
 				}
 
 				if (!properties) {
 					[item removeAllViews];
 					[customItems[i] removeObjectAtIndex:cnt];
 				} else {
-					[processedKeys removeObject: indicatorName];
+					[processedKeys removeObject:indicatorName];
 
 					NSInteger &type(MSHookIvar<NSInteger>(item, "_type"));
 					if (type > keyidx) {
 						keyidx = type;
 					}
-					item.properties = [properties isKindOfClass: [NSDictionary class]] ? (NSDictionary*) properties : nil;
+					item.properties = [properties isKindOfClass:[NSDictionary class]] ? (NSDictionary*) properties : nil;
 				}
 			}
 		} else {
@@ -141,26 +141,26 @@ extern "C" mach_port_t bootstrap_port;
 			} else {
 				item = [%c(UIStatusBarItem) itemWithType:keyidx++];
 			}
-			[item setIndicatorName: key];
+			[item setIndicatorName:key];
 
 			NSObject* properties = [_currentMessage objectForKey:key];
-			item.properties = [properties isKindOfClass: [NSDictionary class]] ? (NSDictionary*) properties : nil;
+			item.properties = [properties isKindOfClass:[NSDictionary class]] ? (NSDictionary*) properties : nil;
 
 			if ([item leftOrder]) {
 				if (!customItems[0]) {
 					customItems[0] = [[NSMutableArray alloc] init];
 				}
-				[customItems[0] addObject: item];
+				[customItems[0] addObject:item];
 			} else if([item rightOrder]) {
 				if(!customItems[1]) {
 					customItems[1] = [[NSMutableArray alloc] init];
 				}
-				[customItems[1] addObject: item];
+				[customItems[1] addObject:item];
 			} else if(item) {
 				if(!customItems[2]) {
 					customItems[2] = [[NSMutableArray alloc] init];
 				}
-				[customItems[2] addObject: item];
+				[customItems[2] addObject:item];
 			}
 		}
 	}
@@ -171,7 +171,7 @@ extern "C" mach_port_t bootstrap_port;
 	if(!%c(UIApplication)) {
 		return;
 	}
-
+	HBLogDebug(@"Updating StatusBar");
 	[self retrieveCurrentMessage];
 
 	// need a decent guard band because we do call before UIApp exists
@@ -222,14 +222,14 @@ extern "C" mach_port_t bootstrap_port;
 			_submittedMessages = [[NSMutableDictionary alloc] init];
 		}
 		if (properties) {
-			[_submittedMessages setObject: properties forKey: item];
+			[_submittedMessages setObject:properties forKey:item];
 		} else {
-			[_submittedMessages removeObjectForKey: item];
+			[_submittedMessages removeObjectForKey:item];
 		}
 
-		NSString* bundleId = [[NSBundle mainBundle] bundleIdentifier];
+		NSString* bundleId = NSBundle.mainBundle.bundleIdentifier;
 		if (_isLocal) {
-			[[LSStatusBarServer sharedInstance] setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt: 0]];
+			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt: 0]];
 		} else {
 			NSNumber* pid = [NSNumber numberWithInt:getpid()];
 
@@ -248,19 +248,8 @@ extern "C" mach_port_t bootstrap_port;
 			}
 
 			if (%c(CPDistributedMessagingCenter)) {
-				CPDistributedMessagingCenter* dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
-
-				void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
-				if (!rocketbootstrap_distributedmessagingcenter_apply) {
-					void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-					if(handle) {
-						rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-						dlclose(handle);
-					}
-				}
-				if(rocketbootstrap_distributedmessagingcenter_apply) {
-					rocketbootstrap_distributedmessagingcenter_apply(dmc);
-				}
+				CPDistributedMessagingCenter* dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+				rocketbootstrap_distributedmessagingcenter_apply(dmc);
 
 				[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
 			} else {

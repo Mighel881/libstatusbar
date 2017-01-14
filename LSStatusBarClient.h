@@ -12,7 +12,7 @@
 
 - (NSDictionary*)currentMessage;
 - (void)retrieveCurrentMessage;
-- (bool)processCurrentMessage;
+- (BOOL)processCurrentMessage;
 - (void)resubmitContent;
 - (void)updateStatusBar;
 
