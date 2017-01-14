@@ -43,7 +43,7 @@ void incrementTimer() {
 		CFNotificationCenterRef darwin = CFNotificationCenterGetDarwinNotifyCenter();
 		CFNotificationCenterAddObserver(darwin, (const void *)self, (CFNotificationCallback) updateLockStatus, CFSTR("com.apple.springboard.lockstate"), (const void *)self, CFNotificationSuspensionBehaviorDeliverImmediately);
 
-		notify_post("LSBDidLaunchNotification");
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("LSBDidLaunchNotification"), nil, nil, YES);
 	}
 	return self;
 }
@@ -53,7 +53,7 @@ void incrementTimer() {
 }
 
 - (void)postChanged {
-	notify_post("libstatusbar_changed");
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("libstatusbar_changed"), nil, nil, YES);
 }
 
 - (void)enqueuePostChanged {
