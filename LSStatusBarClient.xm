@@ -62,9 +62,9 @@ extern "C" mach_port_t bootstrap_port;
 		HBLogDebug(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
 	}
 
-	_currentMessage = nil;
+	[_currentMessage release];
 	if (_isLocal) {
-		_currentMessage = [LSStatusBarServer.sharedInstance currentMessage];
+		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
 	} else {
 		CPDistributedMessagingCenter* dmc = nil;
 
@@ -74,7 +74,7 @@ extern "C" mach_port_t bootstrap_port;
 		}
 
 		if (dmc) {
-			_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
+			_currentMessage = [[dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil] retain];
 		}
 	}
 }
@@ -88,12 +88,16 @@ extern "C" mach_port_t bootstrap_port;
 
 - (BOOL)processCurrentMessage {
 	if (!_currentMessage) {
+		HBLogDebug(@"No currentMessage");
 		return NO;
 	}
 
+	HBLogDebug(@"%@", _currentMessage);
+
 	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
-	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
+	[_titleStrings release];
+  _titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 
 	NSInteger keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
@@ -164,6 +168,7 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
+	[processedKeys release];
 	return YES;
 }
 
@@ -188,6 +193,7 @@ extern "C" mach_port_t bootstrap_port;
 				[sb forceUpdateData:NO];
 
 				if (_isLocal) {
+					HBLogDebug(@"Is local");
 					if (%c(SBBulletinListController)) {
 						SBBulletinListView* listview = [[%c(SBBulletinListController) sharedInstance] listView];
 						if (listview) {
@@ -204,7 +210,7 @@ extern "C" mach_port_t bootstrap_port;
 							if (_statusBar) {
 								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
 								// bypass and directly do it.
-
+								HBLogDebug(@"Updating via SBNotificationCenterController");
 								void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
 								[_statusBar forceUpdateToData:&_currentRawData animated:NO];
 							}
@@ -255,6 +261,7 @@ extern "C" mach_port_t bootstrap_port;
 			} else {
 				HBLogDebug(@"[libstatusbar] CPDistributedMessagingCenter was not found when calling -[LSStatusBarClientsetProperties:forItem:].");
 			}
+			[dict release];
 		}
 	}
 }
@@ -269,5 +276,6 @@ extern "C" mach_port_t bootstrap_port;
 	for (NSString* key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
+	[messages release];
 }
 @end
