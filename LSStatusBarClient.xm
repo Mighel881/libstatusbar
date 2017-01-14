@@ -5,7 +5,7 @@
 #import "common.h"
 
 @interface UIStatusBarItem (libstatusbar)
-+ (id)itemWithType:(int) type;
++ (id)itemWithType:(NSInteger)type;
 @end
 
 @interface SBBulletinListController
@@ -13,7 +13,7 @@
 @end
 
 @interface SBNotificationCenterController
-+ (id)sharedInstanceIfExists;
++ (instancetype)sharedInstanceIfExists;
 @property(readonly, assign, nonatomic) SBNotificationCenterViewController* viewController;
 @end
 
@@ -26,11 +26,12 @@ void ResubmitContent(CFNotificationCenterRef center, LSStatusBarClient* client) 
 	[client updateStatusBar];
 }
 
-extern "C" kern_return_t bootstrap_look_up(mach_port_t bp, const char* service_name, mach_port_t *sp);
+extern "C" kern_return_t
+bootstrap_look_up(mach_port_t bp, const char* service_name, mach_port_t *sp);
 extern "C" mach_port_t bootstrap_port;
 
 @implementation LSStatusBarClient
-+ (id)sharedInstance {
++ (instancetype)sharedInstance {
 	static LSStatusBarClient* client;
 
 	if (!client) {
@@ -68,19 +69,8 @@ extern "C" mach_port_t bootstrap_port;
 		CPDistributedMessagingCenter* dmc = nil;
 
 		if (!dmc && %c(CPDistributedMessagingCenter) != nil) {
-			dmc = [%c(CPDistributedMessagingCenter) centerNamed:@"com.apple.springboard.libstatusbar"];
-
-			void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*) = NULL;
-			if (!rocketbootstrap_distributedmessagingcenter_apply) {
-				void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-				if (handle) {
-					rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-					dlclose(handle);
-				}
-			}
-			if (rocketbootstrap_distributedmessagingcenter_apply) {
-				rocketbootstrap_distributedmessagingcenter_apply(dmc);
-			}
+			dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+			rocketbootstrap_distributedmessagingcenter_apply(dmc);
 		}
 
 		if (dmc) {
@@ -89,7 +79,7 @@ extern "C" mach_port_t bootstrap_port;
 	}
 }
 
-- (NSString*)titleStringAtIndex:(int)idx {
+- (NSString*)titleStringAtIndex:(NSInteger)idx {
 	if (idx < _titleStrings.count && idx >= 0) {
 		return [_titleStrings objectAtIndex:idx];
 	}
@@ -105,13 +95,13 @@ extern "C" mach_port_t bootstrap_port;
 
 	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
-	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
+	NSInteger keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
 	extern NSMutableArray* customItems[3];
 
 	for (int i=0; i<3; i++) {
 		if (customItems[i]) {
-			int cnt = [customItems[i] count]-1;
+			NSInteger cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
 				UIStatusBarCustomItem* item = [customItems[i] objectAtIndex: cnt];
 				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
@@ -129,7 +119,7 @@ extern "C" mach_port_t bootstrap_port;
 				} else {
 					[processedKeys removeObject: indicatorName];
 
-					int &type(MSHookIvar<int>(item, "_type"));
+					NSInteger &type(MSHookIvar<NSInteger>(item, "_type"));
 					if (type > keyidx) {
 						keyidx = type;
 					}

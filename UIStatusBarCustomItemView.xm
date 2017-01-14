@@ -10,8 +10,8 @@
 @end
 
 @interface UIStatusBarItemView (lss)
-- (int)legibilityStyle;
-- (float)legibilityStrength;
+- (NSInteger)legibilityStyle;
+- (CGFloat)legibilityStrength;
 @end
 
 @interface UIStatusBarCustomItemView (fgs)

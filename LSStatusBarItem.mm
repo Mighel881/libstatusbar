@@ -165,7 +165,7 @@ NSMutableDictionary* sbitems = nil;
 	NSString* oldTitle = [_properties objectForKey: @"titleString"];
 
 	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString: string])) {
-		//NSLog(@"oldTitle = %@, newTitle = %@", oldTitle, string);
+		//HBLogDebug(@"oldTitle = %@, newTitle = %@", oldTitle, string);
 
 		[_properties setValue: string forKey: @"titleString"];
 

@@ -3,7 +3,7 @@ Name: libstatusbar (Shade Zepheri)
 Provides: libstatusbar
 Replaces: libstatusbar
 Conflicts: libstatusbar
-Depends: mobilesubstrate
+Depends: mobilesubstrate, com.rpetrich.rocketbootstrap
 Version: 0.5
 Architecture: iphoneos-arm
 Description: Improved libstatusbar

@@ -14,7 +14,7 @@ void incrementTimer() {
 }
 
 @implementation LSStatusBarServer
-+ (id)sharedInstance {
++ (instancetype)sharedInstance {
 	static LSStatusBarServer* server;
 
 	if (!server) {
@@ -26,21 +26,15 @@ void incrementTimer() {
 - (id)init {
 	self = [super init];
 	if (self) {
-		_dmc = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.apple.springboard.libstatusbar"];
+		_dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 
 		if (_dmc) {
-			void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-			if (handle) {
-				void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-				rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-				rocketbootstrap_distributedmessagingcenter_apply(_dmc);
-				dlclose(handle);
-			}
+			rocketbootstrap_distributedmessagingcenter_apply(_dmc);
 
 			[_dmc runServerOnCurrentThread];
 			[_dmc registerForMessageName:@"currentMessage" target:self selector:@selector(currentMessage)];
 			[_dmc registerForMessageName:@"setProperties:userInfo:" target:self selector:@selector(setProperties:userInfo:)];
-			NSLog(@"[libstatusbar] server running in process without AppSupport/CPDistributedMessagingCenter");
+			HBLogDebug(@"[libstatusbar] server running in process without AppSupport/CPDistributedMessagingCenter");
 		}
 		_currentMessage = [[NSMutableDictionary alloc] init];
 		_currentKeys = [[NSMutableArray alloc] init];
@@ -122,7 +116,7 @@ static void NoteExitKQueueCallback(
 
 void MonitorPID(NSNumber* pid) {
     //FILE *                f;
-    int                     kq;
+    NSInteger                     kq;
     struct kevent           changes;
 		CFFileDescriptorContext context = { 0, (void *)CFBridgingRetain(pid), NULL, NULL, NULL };
     CFRunLoopSourceRef      rls;
@@ -142,7 +136,7 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)registerPid:(NSNumber*)thepid {
-	int pid = [thepid intValue];
+	NSInteger pid = [thepid intValue];
 	if (!pid) {
 		return;
 	}
@@ -158,7 +152,7 @@ void MonitorPID(NSNumber* pid) {
 
 - (void)setProperties:(id)properties forItem:(NSString*)item bundle:(NSString*)bundle pid:(NSNumber*)pid {
 	if (!item || !pid) {
-		NSLog(@"[libstatusbar] Server: Missing info, returning... %@ %@", [item description], [pid description]);
+		HBLogDebug(@"[libstatusbar] Server: Missing info, returning... %@ %@", [item description], [pid description]);
 		return;
 	}
 
@@ -203,7 +197,7 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)pidDidExit:(NSNumber*)pid {
-	int nKeys = [_currentKeys count];
+	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
 		NSString* item = [_currentKeys objectAtIndex: i];
 
@@ -214,7 +208,7 @@ void MonitorPID(NSNumber* pid) {
 
 		if ([pids containsObject:pid]) {
 			[pids removeObject:pid];
-			NSLog(@"[libstatusbar] Server: Removing object for PID %@", pid);
+			HBLogDebug(@"[libstatusbar] Server: Removing object for PID %@", pid);
 
 			if ([pids count]==0) {
 				// object is truly dead
@@ -232,7 +226,7 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)appDidExit:(NSString*)bundle {
-	int nKeys = [_currentKeys count];
+	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
 		NSString* item = [_currentKeys objectAtIndex: i];
 
@@ -243,7 +237,7 @@ void MonitorPID(NSNumber* pid) {
 
 		if ([pids containsObject:bundle]) {
 			[pids removeObject:bundle];
-			NSLog(@"[libstatusbar] Server: Removing object for bundle %@", bundle);
+			HBLogDebug(@"[libstatusbar] Server: Removing object for bundle %@", bundle);
 
 			if ([pids count]==0) {
 				// object is truly dead
@@ -287,7 +281,7 @@ void MonitorPID(NSNumber* pid) {
 - (void)startTimer {
 	// is timer already running?
 	if (timer) {
-		NSLog(@"[libstatusbar] Server: Timer is already active. Ignoring request to start timer.");
+		HBLogDebug(@"[libstatusbar] Server: Timer is already active. Ignoring request to start timer.");
 		return;
 	}
 
@@ -340,7 +334,7 @@ void MonitorPID(NSNumber* pid) {
 	NSArray* titleStrings = [_currentMessage objectForKey: @"titleStrings"];
 
 	if (titleStrings && [titleStrings count]) {
-		int value = TitleStringIndex; // -1 ++ = 0. so it should work
+		NSInteger value = TitleStringIndex; // -1 ++ = 0. so it should work
 		TitleStringIndex++;
 		if (timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count]) ) {
 			value = 0;

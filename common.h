@@ -13,6 +13,7 @@
 #import <objc/runtime.h>
 
 #import <AppSupport/CPDistributedMessagingCenter.h>
+#import <rocketbootstrap/rocketbootstrap.h>
 #import "UIApplication_libstatusbar.h"
 #import "headers.h"
 

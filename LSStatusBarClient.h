@@ -12,12 +12,12 @@
 
 - (NSDictionary*)currentMessage;
 - (void)retrieveCurrentMessage;
-- (bool) processCurrentMessage;
+- (bool)processCurrentMessage;
 - (void)resubmitContent;
 - (void)updateStatusBar;
 
 - (void)setProperties:(id)properties forItem:(NSString*)item;
 
-- (NSString*)titleStringAtIndex:(int)idx;
+- (NSString*)titleStringAtIndex:(NSInteger)idx;
 
 @end

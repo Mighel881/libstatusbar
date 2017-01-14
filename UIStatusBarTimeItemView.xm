@@ -6,11 +6,11 @@
 @end
 
 %hook UIStatusBarTimeItemView
-- (BOOL)updateForNewData:(id)arg1 actions:(int)arg2 {
+- (BOOL)updateForNewData:(id)arg1 actions:(NSInteger)arg2 {
 	__strong NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
 	NSString *oldString = _timeString;
 
-	int idx = [[[LSStatusBarClient sharedInstance] currentMessage][@"TitleStringIndex"] intValue];
+	NSInteger idx = [[[LSStatusBarClient sharedInstance] currentMessage][@"TitleStringIndex"] intValue];
 
 	// Fetch current string
 	_timeString = [[LSStatusBarClient sharedInstance] titleStringAtIndex:idx];
@@ -29,7 +29,7 @@
 	__strong NSString* &_timeString(MSHookIvar<NSString*>(self, "_timeString"));
 	NSMutableString* timeString = [_timeString mutableCopy];
 
-	float maxlen;
+	CGFloat maxlen;
 
 	CGSize screenSz = UIScreen.mainScreen.bounds.size;
 	maxlen = screenSz.width * 0.6f;

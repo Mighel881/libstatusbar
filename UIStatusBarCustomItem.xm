@@ -4,11 +4,11 @@
 
 //%subclass UIStatusBarCustomItem : UIStatusBarItem
 %hook UIStatusBarCustomItem
-- (int)type {
-	return MSHookIvar<int>(self, "_type");
+- (NSInteger)type {
+	return MSHookIvar<NSInteger>(self, "_type");
 }
 
-- (int)leftOrder {
+- (NSInteger)leftOrder {
 	if (NSDictionary* properties = [self properties]) {
 		NSNumber* nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
@@ -19,7 +19,7 @@
 	return 0;
 }
 
-- (int)rightOrder {
+- (NSInteger)rightOrder {
 	if (NSDictionary* properties = [self properties]) {
 		NSNumber* nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
@@ -33,7 +33,7 @@
 	}
 }
 
-- (int)priority {
+- (NSInteger)priority {
 	return %orig;
 	//return 0;
 }
