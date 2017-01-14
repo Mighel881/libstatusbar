@@ -1,4 +1,4 @@
-This is a fork of Elijah Frederickson fork libstatusbar.
+This is a fork of Elijah Frederickson fork of libstatusbar.
 
 It contains some improvements and fixes including:
 - Updated to use Logos (and many other syntax enhancements)
@@ -14,4 +14,5 @@ Negative changes:
 - Dropped armv6 support (because I don't have the SDKs for it)
 - (May have) dropped <iOS 7 support
 
-Dont Even know if this properly supports iOS 9.3 or 10.X but sure
+Only major problem is Statusbar not updating but eh whatever.
+(And somebody plz make %sublcass be able to add ivars)

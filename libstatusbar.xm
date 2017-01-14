@@ -13,7 +13,7 @@ NSMutableArray* customItems[3];	 // left, right, center
 %hook UIStatusBarItem
 + (id)itemWithType:(NSInteger)arg1 {
 	id ret = %orig;
-	if (ret == nil) {
+	if (!ret) {
 		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
 	}
 	return ret;
@@ -21,7 +21,7 @@ NSMutableArray* customItems[3];	 // left, right, center
 
 + (id)itemWithType:(NSInteger)arg1 idiom:(NSInteger)arg2 {
 	id ret = %orig;
-	if (ret == nil) {
+	if (!ret) {
 		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
 	}
 	return ret;
@@ -36,7 +36,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 
 	UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(self, "_foregroundView");
 
-	id foregroundStyle = [_foregroundView foregroundStyle];
+	UIStatusBarForegroundStyleAttributes *foregroundStyle = [_foregroundView foregroundStyle];
 
 	_view = [%c(UIStatusBarItemView) createViewForItem:item withData:nil actions:0 foregroundStyle:foregroundStyle];
 
@@ -141,7 +141,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 
 	CGFloat startPosition = [self _startPosition];
 	for (UIStatusBarItemView* view in [self _itemViewsSortedForLayout]) {
-		if (view.superview == nil) {
+		if (!view.superview) {
 			/*[view setVisible: NO];
 			if (cfvers >= CF_71)
 			{

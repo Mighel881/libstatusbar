@@ -78,14 +78,14 @@ void incrementTimer() {
 			NSNumber* visible = [dict objectForKey:@"visible"];
 			if (!visible || [visible boolValue]) {
 				NSString* titleString = [dict objectForKey:@"titleString"];
-				if(titleString && [titleString length]) {
-					if(item && [item isEqualToString: key]) {
+				if (titleString && [titleString length]) {
+					if (item && [item isEqualToString: key]) {
 						[self setState:[titleStrings count]];
 						[self resyncTimer];
 					}
 					[titleStrings addObject:titleString];
 
-					if([[dict objectForKey: @"hidesTime"] boolValue]) {
+					if ([[dict objectForKey: @"hidesTime"] boolValue]) {
 						timeHidden = YES;
 					}
 				}

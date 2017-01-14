@@ -13,7 +13,7 @@
 @end
 
 @interface SBNotificationCenterController
-+ (instancetype)sharedInstanceIfExists;
++ (instancetype)sharedInstance;
 @property(readonly, assign, nonatomic) SBNotificationCenterViewController* viewController;
 @end
 
@@ -68,7 +68,7 @@ extern "C" mach_port_t bootstrap_port;
 	} else {
 		CPDistributedMessagingCenter* dmc = nil;
 
-		if (!dmc && %c(CPDistributedMessagingCenter) != nil) {
+		if (!dmc && %c(CPDistributedMessagingCenter)) {
 			dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 			rocketbootstrap_distributedmessagingcenter_apply(dmc);
 		}
@@ -179,7 +179,7 @@ extern "C" mach_port_t bootstrap_port;
 		if (%c(UIApplication) && [%c(UIApplication) sharedApplication]) {
 			UIStatusBar* sb = [[%c(UIApplication) sharedApplication] statusBar];
 
-			if(!sb) {
+			if (!sb) {
 				return;
 			}
 
@@ -191,15 +191,15 @@ extern "C" mach_port_t bootstrap_port;
 					if (%c(SBBulletinListController)) {
 						SBBulletinListView* listview = [[%c(SBBulletinListController) sharedInstance] listView];
 						if (listview) {
-							UIStatusBar* _statusBar = MSHookIvar<id>(listview, "_statusBar");
+							UIStatusBar* _statusBar = MSHookIvar<UIStatusBar*>(listview, "_statusBar");
 							[_statusBar forceUpdateData:NO];
 						}
 					}
 
 					if (%c(SBNotificationCenterController)) {
-						SBNotificationCenterViewController *vc = [[%c(SBNotificationCenterController) sharedInstanceIfExists] viewController];
+						SBNotificationCenterViewController *vc = [[%c(SBNotificationCenterController) sharedInstance] viewController];
 						if (vc) {
-							UIStatusBar* _statusBar = MSHookIvar<id>(vc, "_statusBar");
+							UIStatusBar* _statusBar = MSHookIvar<UIStatusBar*>(vc, "_statusBar");
 
 							if (_statusBar) {
 								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
