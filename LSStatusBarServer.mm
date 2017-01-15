@@ -262,7 +262,15 @@ void MonitorPID(NSNumber *pid) {
 }
 
 - (void)setState:(NSUInteger)newState {
-	_currentMessage[@"TitleStringIndex"] = @(newState);
+	uint64_t value = newState;
+	static int token = -1;
+	if(token < 0)
+	{
+		const char* notif = "libstatusbar_changed";
+		notify_register_check(notif, &token);
+	}
+	notify_set_state(token, value);
+	//_currentMessage[@"TitleStringIndex"] = @(newState);
 	[self enqueuePostChanged];
 }
 
@@ -326,13 +334,32 @@ void MonitorPID(NSNumber *pid) {
 	NSArray *titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
 	if (titleStrings && [titleStrings count]) {
+		/*
 		NSInteger value = TitleStringIndex; // -1 ++ = 0. so it should work
 		TitleStringIndex++;
 		if (timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count]) ) {
 			value = 0;
 			TitleStringIndex = -1;
+
 		}
 		[self setState:value];
+		*/
+		uint64_t value;
+		static int token = -1;
+		if (token < 0) {
+			const char* notif = "libstatusbar_changed";
+			notify_register_check(notif, &token);
+		}
+		notify_get_state(token, &value);
+
+		value++;
+		if (timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count])) {
+			value = 0;
+		}
+
+		notify_set_state(token, value);
+
+		[self enqueuePostChanged];
 	} else {
 		[self stopTimer];
 	}

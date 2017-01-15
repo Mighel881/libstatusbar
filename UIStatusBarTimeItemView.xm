@@ -10,7 +10,17 @@
 	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
 	NSString *oldString = [_timeString retain];
 
-	NSInteger idx = [[LSStatusBarClient.sharedInstance currentMessage][@"TitleStringIndex"] intValue];
+	//NSInteger idx = [[LSStatusBarClient.sharedInstance currentMessage][@"TitleStringIndex"] intValue];
+
+	int idx;
+	uint64_t value;
+	const char* notif = "libstatusbar_changed";
+	static int token = 0;
+	if (!token) {
+		notify_register_check(notif, &token);
+	}
+	notify_get_state(token, &value);
+	idx = value;
 
 	// Fetch current string
 	_timeString = [[LSStatusBarClient.sharedInstance titleStringAtIndex:idx] retain];
