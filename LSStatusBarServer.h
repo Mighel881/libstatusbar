@@ -2,11 +2,11 @@
 
 @interface LSStatusBarServer : NSObject {
 	CPDistributedMessagingCenter *_dmc;
-	NSMutableDictionary* _currentMessage;
-	NSMutableArray* _currentKeys;
-	NSMutableDictionary* _currentKeyUsage;
+	NSMutableDictionary *_currentMessage;
+	NSMutableArray *_currentKeys;
+	NSMutableDictionary *_currentKeyUsage;
 
-	NSMutableArray* clientPids;
+	NSMutableArray *clientPids;
 
 
 	CFRunLoopTimerRef timer;

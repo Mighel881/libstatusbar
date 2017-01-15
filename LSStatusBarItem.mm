@@ -2,7 +2,7 @@
 #import "LSStatusBarItem.h"
 #import "LSStatusBarClient.h"
 
-NSMutableDictionary* sbitems = nil;
+NSMutableDictionary *sbitems = nil;
 
 @implementation LSStatusBarItem
 + (void)_updateProperties:(NSMutableDictionary*)dict forIdentifier:(NSString*)identifier {
@@ -10,13 +10,13 @@ NSMutableDictionary* sbitems = nil;
 		sbitems = [NSMutableDictionary new];
 	}
 
-	NSArray* idArray = [sbitems objectForKey:identifier];
-	for (LSStatusBarItem* item in idArray) {
+	NSArray *idArray = [sbitems objectForKey:identifier];
+	for (LSStatusBarItem *item in idArray) {
 		[item _setProperties:dict];
 	}
 }
 
-- (id)initWithIdentifier:(NSString*)identifier alignment:(StatusBarAlignment)alignment {
+- (instancetype)initWithIdentifier:(NSString*)identifier alignment:(StatusBarAlignment)alignment {
 	if (!identifier) {
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: No identifer specified"];
 	}
@@ -24,16 +24,17 @@ NSMutableDictionary* sbitems = nil;
 	if (!alignment) {
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Alignment not specified"];
 	}
-
-	if ((self = [super init])) {
+	
+	self = [super init];
+	if (self) {
 
 		if (!sbitems) {
 			sbitems = [NSMutableDictionary new];
 		}
 
-		NSMutableArray* idArray = [sbitems objectForKey:identifier];
-		LSStatusBarItem* item = idArray ? [idArray count] ? [idArray objectAtIndex: 0] : nil : nil;
-		NSMutableDictionary* properties = item ? (NSMutableDictionary*)[item properties] : nil;
+		NSMutableArray *idArray = [sbitems objectForKey:identifier];
+		LSStatusBarItem *item = idArray ? [idArray count] ? [idArray objectAtIndex: 0] : nil : nil;
+		NSMutableDictionary *properties = item ? (NSMutableDictionary*)[item properties] : nil;
 		if (!properties) {
 			properties = [NSMutableDictionary new];
 		}
@@ -41,7 +42,7 @@ NSMutableDictionary* sbitems = nil;
 
 		[self _setProperties:properties];
 
-		NSNumber* align = [_properties objectForKey:@"alignment"];
+		NSNumber *align = [_properties objectForKey:@"alignment"];
 		if (!align) {
 			[_properties setObject:[NSNumber numberWithInt:alignment] forKey:@"alignment"];
 		} else if ([align intValue] != alignment) {
@@ -68,7 +69,7 @@ NSMutableDictionary* sbitems = nil;
 
 - (void)dealloc {
 	if (sbitems) {
-		NSMutableArray* idArray = [sbitems objectForKey:_identifier];
+		NSMutableArray *idArray = [sbitems objectForKey:_identifier];
 
 		// kill the current item count
 		if (idArray) {
@@ -105,11 +106,11 @@ NSMutableDictionary* sbitems = nil;
 
 
 - (StatusBarAlignment)alignment {
-	NSNumber* alignment = [_properties objectForKey:@"alignment"];
+	NSNumber *alignment = [_properties objectForKey:@"alignment"];
 	return alignment ? (StatusBarAlignment) [alignment intValue] : StatusBarAlignmentLeft;
 }
 
-- (void) setVisible:(BOOL)visible {
+- (void)setVisible:(BOOL)visible {
 	[_properties setObject:[NSNumber numberWithBool:visible] forKey:@"visible"];
 
 	if (!_manualUpdate) {
@@ -118,12 +119,12 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (BOOL)isVisible {
-	NSNumber* visible = [_properties objectForKey:@"visible"];
+	NSNumber *visible = [_properties objectForKey:@"visible"];
 	return visible ? [visible boolValue] : YES;
 }
 
-- (void) setHidesTime:(BOOL)hidesTime {
-	NSNumber* oldTime = [_properties objectForKey:@"imageName"];
+- (void)setHidesTime:(BOOL)hidesTime {
+	NSNumber *oldTime = [_properties objectForKey:@"imageName"];
 	if ([oldTime boolValue] != hidesTime) {
 		[_properties setObject:[NSNumber numberWithBool:hidesTime] forKey:@"hidesTime"];
 
@@ -134,7 +135,7 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (BOOL)hidesTime {
-	NSNumber* hidesTime = [_properties objectForKey:@"hidesTime"];
+	NSNumber *hidesTime = [_properties objectForKey:@"hidesTime"];
 	return hidesTime ? [hidesTime boolValue] : NO;
 }
 
@@ -144,7 +145,7 @@ NSMutableDictionary* sbitems = nil;
 		//[NSException raise: NSInternalInconsistencyException format: @"LSStatusBarItem: Cannot use images with a center alignment"];
 	}
 
-	NSString* oldImageName = [_properties objectForKey:@"imageName"];
+	NSString *oldImageName = [_properties objectForKey:@"imageName"];
 
 	if (!oldImageName || ![oldImageName isEqualToString:imageName]) {
 		[_properties setValue:imageName forKey:@"imageName"];
@@ -164,7 +165,7 @@ NSMutableDictionary* sbitems = nil;
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Cannot use a title string with a side alignment"];
 	}
 
-	NSString* oldTitle = [_properties objectForKey: @"titleString"];
+	NSString *oldTitle = [_properties objectForKey: @"titleString"];
 
 	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString:string])) {
 		//HBLogDebug(@"oldTitle = %@, newTitle = %@", oldTitle, string);
@@ -178,7 +179,7 @@ NSMutableDictionary* sbitems = nil;
 }
 
 - (void)setCustomViewClass:(NSString*)customViewClass {
-	NSString* oldClass = [_properties objectForKey:@"customViewClass"];
+	NSString *oldClass = [_properties objectForKey:@"customViewClass"];
 
 	if (oldClass) {
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Item already has a custom view class!"];

@@ -1,9 +1,9 @@
 @interface LSStatusBarClient : NSObject {
 	bool _isLocal;
-	NSDictionary* _currentMessage;
-	NSMutableDictionary* _submittedMessages;
+	NSDictionary *_currentMessage;
+	NSMutableDictionary *_submittedMessages;
 
-	NSArray* _titleStrings;
+	NSArray *_titleStrings;
 }
 
 + (instancetype)sharedInstance;

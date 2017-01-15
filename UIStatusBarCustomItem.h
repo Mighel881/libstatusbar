@@ -8,5 +8,5 @@
 
 - (void)setIndicatorName:(NSString*)name;
 
-@property (nonatomic, retain) NSDictionary* properties;
+@property (nonatomic, retain) NSDictionary *properties;
 @end

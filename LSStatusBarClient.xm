@@ -14,14 +14,14 @@
 
 @interface SBNotificationCenterController
 + (instancetype)sharedInstance;
-@property(readonly, assign, nonatomic) SBNotificationCenterViewController* viewController;
+@property(readonly, assign, nonatomic) SBNotificationCenterViewController *viewController;
 @end
 
-void UpdateStatusBar(CFNotificationCenterRef center, LSStatusBarClient* client) {
+void UpdateStatusBar(CFNotificationCenterRef center, LSStatusBarClient *client) {
 	[client updateStatusBar];
 }
 
-void ResubmitContent(CFNotificationCenterRef center, LSStatusBarClient* client) {
+void ResubmitContent(CFNotificationCenterRef center, LSStatusBarClient *client) {
 	[client resubmitContent];
 	[client updateStatusBar];
 }
@@ -32,15 +32,17 @@ extern "C" mach_port_t bootstrap_port;
 
 @implementation LSStatusBarClient
 + (instancetype)sharedInstance {
-	static LSStatusBarClient* client;
+  static LSStatusBarClient *sharedInstance = nil;
 
-	if (!client) {
-		client = [[LSStatusBarClient alloc] init];
-	}
-	return client;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    sharedInstance = [[self alloc] init];
+  });
+
+  return sharedInstance;
 }
 
-- (id)init {
+- (instancetype)init {
 	self = [super init];
 	if (self) {
 		_isLocal = %c(SpringBoard) ? YES : NO;
@@ -66,7 +68,7 @@ extern "C" mach_port_t bootstrap_port;
 	if (_isLocal) {
 		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
 	} else {
-		CPDistributedMessagingCenter* dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+		CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 		rocketbootstrap_distributedmessagingcenter_apply(dmc);
 		_currentMessage = [[dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil] retain];
 	}
@@ -88,25 +90,25 @@ extern "C" mach_port_t bootstrap_port;
 
 	HBLogDebug(@"%@", _currentMessage);
 
-	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
+	NSMutableArray *processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
 	[_titleStrings release];
   _titleStrings = [[_currentMessage objectForKey:@"titleStrings"] retain];
 
 	NSInteger keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
-	extern NSMutableArray* customItems[3];
+	extern NSMutableArray *customItems[3];
 
 	for (int i=0; i<3; i++) {
 		if (customItems[i]) {
 			NSInteger cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
-				UIStatusBarCustomItem* item = [customItems[i] objectAtIndex:cnt];
-				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
+				UIStatusBarCustomItem *item = [customItems[i] objectAtIndex:cnt];
+				//UIStatusBarCustomItem *item = [allCustomItems objectAtIndex: cnt];
 
-				NSString* indicatorName = [item indicatorName];
+				NSString *indicatorName = [item indicatorName];
 
-				NSObject* properties = nil;
+				NSObject *properties = nil;
 				if (_currentMessage) {
 					properties = [_currentMessage objectForKey:indicatorName];
 				}
@@ -134,8 +136,8 @@ extern "C" mach_port_t bootstrap_port;
 
 	if (processedKeys && [processedKeys count]) {
 		ret = YES;
-		for (NSString* key in processedKeys) {
-			UIStatusBarCustomItem* item = nil;
+		for (NSString *key in processedKeys) {
+			UIStatusBarCustomItem *item = nil;
 			if ([%c(UIStatusBarItem) respondsToSelector:@selector(itemWithType:idiom:)]) {
 				item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
 			} else {
@@ -143,7 +145,7 @@ extern "C" mach_port_t bootstrap_port;
 			}
 			[item setIndicatorName:key];
 
-			NSObject* properties = [_currentMessage objectForKey:key];
+			NSObject *properties = [_currentMessage objectForKey:key];
 			item.properties = [properties isKindOfClass:[NSDictionary class]] ? (NSDictionary*) properties : nil;
 
 			if ([item leftOrder]) {
@@ -178,22 +180,21 @@ extern "C" mach_port_t bootstrap_port;
 	// need a decent guard band because we do call before UIApp exists
 	if ([self processCurrentMessage]) {
 		if (%c(UIApplication) && [%c(UIApplication) sharedApplication]) {
-			UIStatusBar* sb = [[%c(UIApplication) sharedApplication] statusBar];
+			UIStatusBar *sb = [[%c(UIApplication) sharedApplication] statusBar];
 
 			if (!sb) {
 				return;
 			}
 
-			UIStatusBarForegroundView* _foregroundView = MSHookIvar<UIStatusBarForegroundView*>(sb, "_foregroundView");
+			UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(sb, "_foregroundView");
 			if (_foregroundView) {
 				[sb forceUpdateData:NO];
 
 				if (_isLocal) {
-					HBLogDebug(@"Is local");
 					if (%c(SBBulletinListController)) {
-						SBBulletinListView* listview = [[%c(SBBulletinListController) sharedInstance] listView];
+						SBBulletinListView *listview = [[%c(SBBulletinListController) sharedInstance] listView];
 						if (listview) {
-							UIStatusBar* _statusBar = MSHookIvar<UIStatusBar*>(listview, "_statusBar");
+							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(listview, "_statusBar");
 							[_statusBar forceUpdateData:NO];
 						}
 					}
@@ -201,12 +202,11 @@ extern "C" mach_port_t bootstrap_port;
 					if (%c(SBNotificationCenterController)) {
 						SBNotificationCenterViewController *vc = [[%c(SBNotificationCenterController) sharedInstance] viewController];
 						if (vc) {
-							UIStatusBar* _statusBar = MSHookIvar<UIStatusBar*>(vc, "_statusBar");
+							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(vc, "_statusBar");
 
 							if (_statusBar) {
 								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
 								// bypass and directly do it.
-								HBLogDebug(@"Updating via SBNotificationCenterController");
 								void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
 								[_statusBar forceUpdateToData:&_currentRawData animated:NO];
 							}
@@ -224,18 +224,18 @@ extern "C" mach_port_t bootstrap_port;
 			_submittedMessages = [[NSMutableDictionary alloc] init];
 		}
 		if (properties) {
-			[_submittedMessages setObject: properties forKey: item];
+			[_submittedMessages setObject:properties forKey:item];
 		} else {
-			[_submittedMessages removeObjectForKey: item];
+			[_submittedMessages removeObjectForKey:item];
 		}
 
-		NSString* bundleId = [[NSBundle mainBundle] bundleIdentifier];
+		NSString *bundleId = NSBundle.mainBundle.bundleIdentifier;
 		if (_isLocal) {
-			[[LSStatusBarServer sharedInstance] setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt: 0]];
+			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt:0]];
 		} else {
-			NSNumber* pid = [NSNumber numberWithInt:getpid()];
+			NSNumber *pid = [NSNumber numberWithInt:getpid()];
 
-			NSMutableDictionary* dict = [[NSMutableDictionary alloc] initWithCapacity:4];
+			NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:4];
 			if (item) {
 				[dict setObject:item forKey:@"item"];
 			}
@@ -249,7 +249,7 @@ extern "C" mach_port_t bootstrap_port;
 				[dict setObject:bundleId forKey:@"bundle"];
 			}
 
-			CPDistributedMessagingCenter* dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
+			CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 			rocketbootstrap_distributedmessagingcenter_apply(dmc);
 			[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
 
@@ -259,13 +259,13 @@ extern "C" mach_port_t bootstrap_port;
 }
 
 - (void)resubmitContent {
-	NSDictionary* messages = _submittedMessages;
+	NSDictionary *messages = _submittedMessages;
 	if (!messages) {
 		return;
 	}
 	_submittedMessages = nil;
 
-	for (NSString* key in messages) {
+	for (NSString *key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
 	[messages release];

@@ -6,7 +6,7 @@
 #import "LSStatusBarClient.h"
 #import "LSStatusBarItem.h"
 
-NSMutableArray* customItems[3];	 // left, right, center
+NSMutableArray *customItems[3];	 // left, right, center
 
 #pragma mark UIStatusBar* Hooks
 
@@ -28,8 +28,8 @@ NSMutableArray* customItems[3];	 // left, right, center
 }
 %end
 
-UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
-	UIStatusBarItemView* _view = [item viewForManager:self];
+UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
+	UIStatusBarItemView *_view = [item viewForManager:self];
 	if (_view) {
 		return _view;
 	}
@@ -43,7 +43,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 	[_view setLayoutManager: self];
 
 	NSInteger _region = MSHookIvar<NSInteger>(self, "_region");
-	switch(_region) {
+	switch (_region) {
 		case 0: {
 			[_view setContentMode: UIViewContentModeLeft];
 			[_view setAutoresizingMask: UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin];
@@ -69,23 +69,23 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 - (id)_computeVisibleItemsPreservingHistory:(BOOL)arg1 {
 	id ret = %orig;
 
-	__strong UIStatusBarLayoutManager* (&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
+	__strong UIStatusBarLayoutManager *(&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
 
 	CGFloat boundsWidth = self.bounds.size.width;
-	NSMutableArray* center = [ret objectForKey:@(2)];
+	NSMutableArray *center = [ret objectForKey:@(2)];
 	CGFloat centerWidth = [layoutManagers[2] sizeNeededForItems:center];
 
 	CGFloat edgeWidth = (boundsWidth - centerWidth) * 0.5f;
 
 	for (int i = 0; i < 2; i++) {
-		NSMutableArray* arr = [ret objectForKey:@(i)];
+		NSMutableArray *arr = [ret objectForKey:@(i)];
 
 		[layoutManagers[i] clearOverlapFromItems:arr];
 
 		CGFloat arrWidth = [layoutManagers[i] sizeNeededForItems:arr];
 
-		for (UIStatusBarCustomItem* item in customItems[i]) {
-			NSNumber* visible = [[item properties] objectForKey:@"visible"];
+		for (UIStatusBarCustomItem *item in customItems[i]) {
+			NSNumber *visible = [[item properties] objectForKey:@"visible"];
 			if (!visible || [visible boolValue]) {
 				CGFloat itemWidth = [layoutManagers[i] sizeNeededForItem:item];
 				if (arrWidth + itemWidth < edgeWidth + 4) {
@@ -123,8 +123,8 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 	if (_itemViews) {
 		NSInteger _region = MSHookIvar<NSInteger>(self, "_region");
 		if (_region < 3 && customItems[_region]) {
-			for (UIStatusBarCustomItem* item in customItems[_region]) {
-				UIStatusBarItemView* _view = InitializeView(self, item);
+			for (UIStatusBarCustomItem *item in customItems[_region]) {
+				UIStatusBarItemView *_view = InitializeView(self, item);
 				if (_view) {
 					[_itemViews addObject: _view];
 				}
@@ -136,11 +136,11 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager* self, id item) {
 }
 %end
 
-void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
+void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 	UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(self, "_foregroundView");
 
 	CGFloat startPosition = [self _startPosition];
-	for (UIStatusBarItemView* view in [self _itemViewsSortedForLayout]) {
+	for (UIStatusBarItemView *view in [self _itemViewsSortedForLayout]) {
 		if (!view.superview) {
 			/*[view setVisible: NO];
 			if (cfvers >= CF_71)
@@ -198,7 +198,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager* self) {
 - (CGRect)rectForItems:(id)arg1 {
 	NSInteger region = MSHookIvar<NSInteger>(self, "_region");
 
-	for (UIStatusBarCustomItem* item in customItems[region]) {
+	for (UIStatusBarCustomItem *item in customItems[region]) {
 		id visible = item.properties[@"visible"];
 		if (!visible || [visible boolValue]) {
 			[arg1 addObject:item];

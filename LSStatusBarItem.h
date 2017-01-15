@@ -9,9 +9,9 @@ typedef NS_ENUM(NSInteger, StatusBarAlignment) {
 
 @interface LSStatusBarItem : NSObject {
 @private
-	NSString* _identifier;
-	NSMutableDictionary* _properties;
-	NSMutableSet* _delegates;
+	NSString *_identifier;
+	NSMutableDictionary *_properties;
+	NSMutableSet *_delegates;
 	BOOL _manualUpdate;
 }
 
@@ -30,14 +30,14 @@ typedef NS_ENUM(NSInteger, StatusBarAlignment) {
 @property (nonatomic, getter=isVisible) BOOL visible;
 
 // useful only with left/right alignment - will throw error for center alignment
-@property (nonatomic, assign) NSString* imageName;
+@property (nonatomic, assign) NSString *imageName;
 
 // useful only with center alignment - will throw error otherwise
 // will not be visible on the lockscreen
-@property (nonatomic, assign) NSString* titleString;
+@property (nonatomic, assign) NSString *titleString;
 
 // useful if you want to override the UIStatusBarCustomItemView drawing.  Your class must exist in EVERY UIKit process.
-@property (nonatomic, assign) NSString* customViewClass;
+@property (nonatomic, assign) NSString *customViewClass;
 
 // set to NO and manually call update if you need to make multiple changes
 @property (nonatomic, getter=isManualUpdate) BOOL manualUpdate;

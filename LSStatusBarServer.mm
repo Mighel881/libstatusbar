@@ -5,7 +5,7 @@
 
 NSUInteger TitleStringIndex = -1;
 
-void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer* server) {
+void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer *server) {
 	[server updateLockStatus];
 }
 
@@ -15,15 +15,17 @@ void incrementTimer() {
 
 @implementation LSStatusBarServer
 + (instancetype)sharedInstance {
-	static LSStatusBarServer* server;
+  static LSStatusBarServer *sharedInstance = nil;
 
-	if (!server) {
-		server = [[self alloc] init];
-	}
-	return server;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    sharedInstance = [[self alloc] init];
+  });
+
+  return sharedInstance;
 }
 
-- (id)init {
+- (instancetype)init {
 	self = [super init];
 	if (self) {
 		_dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
@@ -54,7 +56,7 @@ void incrementTimer() {
 }
 
 - (void)enqueuePostChanged {
-	NSRunLoop* loop = [NSRunLoop mainRunLoop];
+	NSRunLoop *loop = [NSRunLoop mainRunLoop];
 
 	[loop cancelPerformSelector:@selector(postChanged) target:self argument:nil];
 	[loop performSelector:@selector(postChanged) target:self argument:nil order:0 modes:@[NSDefaultRunLoopMode]];
@@ -63,18 +65,18 @@ void incrementTimer() {
 - (void)processMessageCommonWithFocus:(NSString*)item {
 	timeHidden = NO;
 
-	NSMutableArray* titleStrings = [NSMutableArray array];
-	for (NSString* key in [_currentKeys copy]) {
-		NSDictionary* dict = [_currentMessage objectForKey:key];
+	NSMutableArray *titleStrings = [NSMutableArray array];
+	for (NSString *key in [_currentKeys copy]) {
+		NSDictionary *dict = [_currentMessage objectForKey:key];
 
 		if (!dict || ![dict isKindOfClass:[NSDictionary class]]) {
 			continue;
 		}
-		NSNumber* alignment = [dict objectForKey:@"alignment"];
+		NSNumber *alignment = [dict objectForKey:@"alignment"];
 		if (alignment && ((StatusBarAlignment) [alignment intValue]) == StatusBarAlignmentCenter) {
-			NSNumber* visible = [dict objectForKey:@"visible"];
+			NSNumber *visible = [dict objectForKey:@"visible"];
 			if (!visible || [visible boolValue]) {
-				NSString* titleString = [dict objectForKey:@"titleString"];
+				NSString *titleString = [dict objectForKey:@"titleString"];
 				if (titleString && [titleString length]) {
 					if (item && [item isEqualToString: key]) {
 						[self setState:[titleStrings count]];
@@ -105,13 +107,13 @@ void incrementTimer() {
 static void NoteExitKQueueCallback(
     CFFileDescriptorRef f,
     CFOptionFlags       callBackTypes,
-    NSNumber *              pidinfo
+    NSNumber  *             pidinfo
 ) {
 	  [LSStatusBarServer.sharedInstance pidDidExit:[pidinfo autorelease]];
 }
 
 
-void MonitorPID(NSNumber* pid) {
+void MonitorPID(NSNumber *pid) {
     NSInteger                     kq;
     struct kevent           changes;
 		CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
@@ -156,7 +158,7 @@ void MonitorPID(NSNumber* pid) {
 
 	// get the current item usage by bundles
 
-	NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
+	NSMutableArray *pids = [_currentKeyUsage objectForKey:item];
 	if (!pids) {
 		pids = [NSMutableArray array];
 		[_currentKeyUsage setObject:pids forKey:item];
@@ -195,9 +197,9 @@ void MonitorPID(NSNumber* pid) {
 - (void)pidDidExit:(NSNumber*)pid {
 	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
-		NSString* item = [_currentKeys objectAtIndex:i];
+		NSString *item = [_currentKeys objectAtIndex:i];
 
-		NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
+		NSMutableArray *pids = [_currentKeyUsage objectForKey:item];
 		if (!pids) {
 			continue;
 		}
@@ -224,9 +226,9 @@ void MonitorPID(NSNumber* pid) {
 - (void)appDidExit:(NSString*)bundle {
 	NSInteger nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
-		NSString* item = [_currentKeys objectAtIndex:i];
+		NSString *item = [_currentKeys objectAtIndex:i];
 
-		NSMutableArray* pids = [_currentKeyUsage objectForKey:item];
+		NSMutableArray *pids = [_currentKeyUsage objectForKey:item];
 		if (!pids) {
 			continue;
 		}
@@ -251,10 +253,10 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)setProperties:(NSString*)message userInfo:(NSDictionary*)userInfo {
-	NSString* item = [userInfo objectForKey:@"item"];
-	NSDictionary* properties = [userInfo objectForKey:@"properties"];
-	NSString* bundleId = [userInfo objectForKey:@"bundle"];
-	NSNumber* pid = [userInfo objectForKey:@"pid"];
+	NSString *item = [userInfo objectForKey:@"item"];
+	NSDictionary *properties = [userInfo objectForKey:@"properties"];
+	NSString *bundleId = [userInfo objectForKey:@"bundle"];
+	NSNumber *pid = [userInfo objectForKey:@"pid"];
 
 	[self setProperties:properties forItem:item bundle:bundleId pid:pid];
 }
@@ -294,7 +296,7 @@ void MonitorPID(NSNumber* pid) {
 	[self stopTimer];
 
 	if (!locked) {
-		NSArray* titleStrings = [_currentMessage objectForKey: @"titleStrings"];
+		NSArray *titleStrings = [_currentMessage objectForKey: @"titleStrings"];
 		if (titleStrings && [titleStrings count]) {
 			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 			CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
@@ -321,7 +323,7 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)incrementTimer {
-	NSArray* titleStrings = [_currentMessage objectForKey:@"titleStrings"];
+	NSArray *titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
 	if (titleStrings && [titleStrings count]) {
 		NSInteger value = TitleStringIndex; // -1 ++ = 0. so it should work

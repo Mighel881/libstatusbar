@@ -9,8 +9,8 @@
 }
 
 - (NSInteger)leftOrder {
-	if (NSDictionary* properties = [self properties]) {
-		NSNumber* nsalign = [properties objectForKey:@"alignment"];
+	if (NSDictionary *properties = [self properties]) {
+		NSNumber *nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
 		if (alignment & StatusBarAlignmentLeft) {
 			return 15;
@@ -20,8 +20,8 @@
 }
 
 - (NSInteger)rightOrder {
-	if (NSDictionary* properties = [self properties]) {
-		NSNumber* nsalign = [properties objectForKey:@"alignment"];
+	if (NSDictionary *properties = [self properties]) {
+		NSNumber *nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
 		if (alignment & StatusBarAlignmentRight) {
 			return 15;
@@ -45,13 +45,13 @@
 
 %new
 - (void)setProperties:(NSDictionary*)properties {
-	__strong NSDictionary* &_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
+	__strong NSDictionary *&_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
 	[_properties release];
  	_properties = [properties retain];
 }
 
 - (Class)viewClass {
-	NSString* customViewClass = [[self properties] objectForKey:@"customViewClass"];
+	NSString *customViewClass = [[self properties] objectForKey:@"customViewClass"];
 
 	if (customViewClass) {
 		Class ret = NSClassFromString(customViewClass);
@@ -68,8 +68,8 @@
 }
 
 - (NSString*)indicatorName {
-	if (NSDictionary* properties = [self properties]) {
-		NSString* name = [properties objectForKey:@"imageName"];
+	if (NSDictionary *properties = [self properties]) {
+		NSString *name = [properties objectForKey:@"imageName"];
 		if (name) {
 			return name;
 		}
@@ -103,7 +103,7 @@
 	CFDictionarySetValue(_views, (void*) manager, (const void *)view);
 }
 
-void UIStatusBarCustomItem$removeFromSuperview(id key, UIView* view) {
+void UIStatusBarCustomItem$removeFromSuperview(id key, UIView *view) {
 	if (view) {
 		[view removeFromSuperview];
 	}

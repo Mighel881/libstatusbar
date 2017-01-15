@@ -27,8 +27,8 @@
 }
 
 - (_UILegibilityImageSet*)contentsImage {
-	NSString* &_timeString(MSHookIvar<NSString*>(self, "_timeString"));
-	NSMutableString* timeString = [_timeString mutableCopy];
+	NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSMutableString *timeString = [_timeString mutableCopy];
 
 	CGFloat maxlen;
 
@@ -43,7 +43,7 @@
 		}
 	}
 
-	NSString* oldTimeString = _timeString;
+	NSString *oldTimeString = _timeString;
 	_timeString = [timeString retain];
 
 	id ret = %orig;
