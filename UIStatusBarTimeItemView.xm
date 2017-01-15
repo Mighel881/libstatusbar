@@ -7,7 +7,7 @@
 
 %hook UIStatusBarTimeItemView
 - (BOOL)updateForNewData:(id)arg1 actions:(NSInteger)arg2 {
-	NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
 	NSString *oldString = [_timeString retain];
 
 	NSInteger idx = [[LSStatusBarClient.sharedInstance currentMessage][@"TitleStringIndex"] intValue];
@@ -27,7 +27,7 @@
 }
 
 - (_UILegibilityImageSet*)contentsImage {
-	NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
 	NSMutableString *timeString = [_timeString mutableCopy];
 
 	CGFloat maxlen;

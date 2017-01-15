@@ -40,23 +40,23 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 
 	_view = [%c(UIStatusBarItemView) createViewForItem:item withData:nil actions:0 foregroundStyle:foregroundStyle];
 
-	[_view setLayoutManager: self];
+	[_view setLayoutManager:self];
 
 	NSInteger _region = MSHookIvar<NSInteger>(self, "_region");
 	switch (_region) {
 		case 0: {
-			[_view setContentMode: UIViewContentModeLeft];
-			[_view setAutoresizingMask: UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin];
+			[_view setContentMode:UIViewContentModeLeft];
+			[_view setAutoresizingMask:UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin];
 			break;
 		}
 		case 1: {
-			[_view setContentMode: UIViewContentModeRight];
-			[_view setAutoresizingMask: UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin];
+			[_view setContentMode:UIViewContentModeRight];
+			[_view setAutoresizingMask:UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin];
 			break;
 		}
 		case 2: {
-			[_view setContentMode: UIViewContentModeLeft];
-			[_view setAutoresizingMask: UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin]; // 0x25
+			[_view setContentMode:UIViewContentModeLeft];
+			[_view setAutoresizingMask:UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin]; // 0x25
 			break;
 		}
 	}
@@ -69,7 +69,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 - (id)_computeVisibleItemsPreservingHistory:(BOOL)arg1 {
 	id ret = %orig;
 
-	__strong UIStatusBarLayoutManager *(&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
+	UIStatusBarLayoutManager *(&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
 
 	CGFloat boundsWidth = self.bounds.size.width;
 	NSMutableArray *center = [ret objectForKey:@(2)];

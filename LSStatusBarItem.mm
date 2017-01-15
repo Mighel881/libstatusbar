@@ -24,10 +24,9 @@ NSMutableDictionary *sbitems = nil;
 	if (!alignment) {
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Alignment not specified"];
 	}
-	
+
 	self = [super init];
 	if (self) {
-
 		if (!sbitems) {
 			sbitems = [NSMutableDictionary new];
 		}
@@ -53,7 +52,7 @@ NSMutableDictionary *sbitems = nil;
 		if (!idArray) {
 			// this creates a retain/release-less NSMutableArray
 			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-			[sbitems setObject: idArray forKey: identifier];
+			[sbitems setObject:idArray forKey:identifier];
 			CFRelease(idArray);
 		}
 
@@ -165,7 +164,7 @@ NSMutableDictionary *sbitems = nil;
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Cannot use a title string with a side alignment"];
 	}
 
-	NSString *oldTitle = [_properties objectForKey: @"titleString"];
+	NSString *oldTitle = [_properties objectForKey:@"titleString"];
 
 	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString:string])) {
 		//HBLogDebug(@"oldTitle = %@, newTitle = %@", oldTitle, string);

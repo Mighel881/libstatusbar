@@ -4,11 +4,11 @@
 
 //%subclass UIStatusBarCustomItem : UIStatusBarItem
 %hook UIStatusBarCustomItem
-- (NSInteger)type {
-	return MSHookIvar<NSInteger>(self, "_type");
+- (int)type {
+	return MSHookIvar<int>(self, "_type");
 }
 
-- (NSInteger)leftOrder {
+- (int)leftOrder {
 	if (NSDictionary *properties = [self properties]) {
 		NSNumber *nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
@@ -19,7 +19,7 @@
 	return 0;
 }
 
-- (NSInteger)rightOrder {
+- (int)rightOrder {
 	if (NSDictionary *properties = [self properties]) {
 		NSNumber *nsalign = [properties objectForKey:@"alignment"];
 		StatusBarAlignment alignment = nsalign ? (StatusBarAlignment) [nsalign intValue] : StatusBarAlignmentRight;
@@ -33,21 +33,22 @@
 	}
 }
 
-- (NSInteger)priority {
-	return %orig;
-	//return 0;
+- (int)priority {
+	//return %orig;
+	return 0;
 }
 
 %new
 - (NSDictionary*)properties {
-	return MSHookIvar<NSDictionary*>(self, "_properties");
+	NSDictionary *&_properties = MSHookIvar<NSDictionary*>(self, "_properties");
+	return _properties;
 }
 
 %new
 - (void)setProperties:(NSDictionary*)properties {
-	__strong NSDictionary *&_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
+	NSDictionary *&_properties = MSHookIvar<NSDictionary*>(self, "_properties");
 	[_properties release];
- 	_properties = [properties retain];
+	_properties = [properties retain];
 }
 
 - (Class)viewClass {
@@ -74,21 +75,22 @@
 			return name;
 		}
 	}
-	return MSHookIvar<NSString*>(self, "_indicatorName");
+	NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
+	return _indicatorName;
 }
 
 %new
 - (void)setIndicatorName:(NSString*) name {
-	__strong NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
- [_indicatorName release];
- _indicatorName = [name retain];
+	NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
+	[_indicatorName release];
+	_indicatorName = [name retain];
 }
 
 %new
 - (UIStatusBarItemView*)viewForManager:(UIStatusBarLayoutManager*)manager {
 	CFMutableDictionaryRef &_views = MSHookIvar<CFMutableDictionaryRef>(self, "_views");
 	if (_views) {
-		return (UIStatusBarItemView*)CFDictionaryGetValue(_views, (void*) manager);
+		return (UIStatusBarItemView*) CFDictionaryGetValue(_views, (void*) manager);
 	} else {
 		return nil;
 	}
