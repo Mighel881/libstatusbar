@@ -260,13 +260,6 @@ void MonitorPID(NSNumber* pid) {
 }
 
 - (void)setState:(NSUInteger)newState {
-	uint64_t value = newState;
-	static int token = -1;
-	if(token < 0) {
-		const char* notif = "libstatusbar_changed";
-		notify_register_check(notif, &token);
-	}
-	notify_set_state(token, value);
 	_currentMessage[@"TitleStringIndex"] = @(newState);
 	[self enqueuePostChanged];
 }

@@ -80,6 +80,7 @@ extern "C" mach_port_t bootstrap_port;
 }
 
 - (BOOL)processCurrentMessage {
+	BOOL ret = NO;
 	if (!_currentMessage) {
 		HBLogDebug(@"No currentMessage");
 		return NO;
@@ -90,7 +91,7 @@ extern "C" mach_port_t bootstrap_port;
 	NSMutableArray* processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
 	[_titleStrings release];
-  _titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
+  _titleStrings = [[_currentMessage objectForKey:@"titleStrings"] retain];
 
 	NSInteger keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
@@ -111,6 +112,7 @@ extern "C" mach_port_t bootstrap_port;
 				}
 
 				if (!properties) {
+					ret = YES;
 					[item removeAllViews];
 					[customItems[i] removeObjectAtIndex:cnt];
 				} else {
@@ -131,6 +133,7 @@ extern "C" mach_port_t bootstrap_port;
 	keyidx++;
 
 	if (processedKeys && [processedKeys count]) {
+		ret = YES;
 		for (NSString* key in processedKeys) {
 			UIStatusBarCustomItem* item = nil;
 			if ([%c(UIStatusBarItem) respondsToSelector:@selector(itemWithType:idiom:)]) {
@@ -161,8 +164,9 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
+	ret = YES;
 	[processedKeys release];
-	return YES;
+	return ret;
 }
 
 - (void)updateStatusBar {
