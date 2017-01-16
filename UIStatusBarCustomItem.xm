@@ -5,7 +5,8 @@
 //%subclass UIStatusBarCustomItem : UIStatusBarItem
 %hook UIStatusBarCustomItem
 - (int)type {
-	return MSHookIvar<int>(self, "_type");
+	//return MSHookIvar<int>(self, "_type");
+	return 0;
 }
 
 - (int)leftOrder {
