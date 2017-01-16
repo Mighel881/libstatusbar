@@ -197,31 +197,22 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 }
 
 - (CGRect)rectForItems:(id)arg1 {
-	NSInteger &region = MSHookIvar<NSInteger>(self, "_region");
+	int &region = MSHookIvar<int>(self, "_region");
 
-	for (UIStatusBarCustomItem *item in customItems[region]) {
-		id visible = item.properties[@"visible"];
-		if (!visible || [visible boolValue]) {
-			[arg1 addObject:item];
+	if (region != 2) {
+		for (UIStatusBarCustomItem *item in customItems[region]) {
+			NSNumber *visible = [[item properties] objectForKey:@"visible"];
+			if (!visible || [visible boolValue]) {
+				[arg1 addObject:item];
+			}
 		}
 	}
 
-	//return %orig;
 	CGRect rect = %orig;
 	if (region == 2 && [[self _itemViewsSortedForLayout] count] > 1) {
 		rect.origin.x -= [self _startPosition];
 	}
 	return rect;
-	/*CGRect rect = %orig(arg1);
-	if (region == 2)
-	{
-		if ([[self _itemViewsSortedForLayout] count] > 1)
-		{
-			CGFloat width = rect.size.width;
-			rect.origin.x -= floor(width / 2);
-		}
-	}
-	return rect;*/
 }
 %end
 
