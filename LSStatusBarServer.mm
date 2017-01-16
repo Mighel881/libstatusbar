@@ -3,7 +3,7 @@
 #import "LSStatusBarServer.h"
 #import "LSStatusBarItem.h"
 
-NSUInteger TitleStringIndex = -1;
+//NSUInteger TitleStringIndex = -1;
 
 void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer *server) {
 	[server updateLockStatus];
@@ -42,7 +42,7 @@ void incrementTimer() {
 		CFNotificationCenterRef darwin = CFNotificationCenterGetDarwinNotifyCenter();
 		CFNotificationCenterAddObserver(darwin, (const void *)self, (CFNotificationCallback) updateLockStatus, CFSTR("com.apple.springboard.lockstate"), (const void *)self, CFNotificationSuspensionBehaviorDeliverImmediately);
 
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("LSBDidLaunchNotification"), nil, nil, YES);
+		CFNotificationCenterPostNotification(darwin, CFSTR("LSBDidLaunchNotification"), nil, nil, YES);
 	}
 	return self;
 }
@@ -78,13 +78,13 @@ void incrementTimer() {
 			if (!visible || [visible boolValue]) {
 				NSString *titleString = [dict objectForKey:@"titleString"];
 				if (titleString && [titleString length]) {
-					if (item && [item isEqualToString: key]) {
+					if (item && [item isEqualToString:key]) {
 						[self setState:[titleStrings count]];
 						[self resyncTimer];
 					}
 					[titleStrings addObject:titleString];
 
-					if ([[dict objectForKey: @"hidesTime"] boolValue]) {
+					if ([[dict objectForKey:@"hidesTime"] boolValue]) {
 						timeHidden = YES;
 					}
 				}
@@ -114,9 +114,9 @@ static void NoteExitKQueueCallback(
 
 
 void MonitorPID(NSNumber *pid) {
-    NSInteger                     kq;
+    int                     kq;
     struct kevent           changes;
-		CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
+  	CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
     CFRunLoopSourceRef      rls;
 
     kq = kqueue();
@@ -164,8 +164,7 @@ void MonitorPID(NSNumber *pid) {
 		[_currentKeyUsage setObject:pids forKey:item];
 	}
 
-	NSUInteger itemIdx = [_currentKeys indexOfObject:item];
-
+	NSUInteger itemIndex = [_currentKeys indexOfObject:item];
 
 	if (properties) {
 		[_currentMessage setValue:properties forKey:item];
@@ -174,7 +173,7 @@ void MonitorPID(NSNumber *pid) {
 			[pids addObject:pid];
 		}
 
-		if (itemIdx == NSNotFound) {
+		if (itemIndex == NSNotFound) {
 			[_currentKeys addObject:item];
 		}
 	} else {
@@ -184,8 +183,8 @@ void MonitorPID(NSNumber *pid) {
 			// object is truly dead
 			[_currentMessage setValue:nil forKey:item];
 
-			if (itemIdx!=NSNotFound) {
-				[_currentKeys removeObjectAtIndex:itemIdx];
+			if (itemIndex!=NSNotFound) {
+				[_currentKeys removeObjectAtIndex:itemIndex];
 			}
 		}
 	}
@@ -212,9 +211,9 @@ void MonitorPID(NSNumber *pid) {
 				// object is truly dead
 				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
-				if (itemIdx!=NSNotFound) {
-					[_currentKeys removeObjectAtIndex:itemIdx];
+				NSUInteger itemIndex = [_currentKeys indexOfObject:item];
+				if (itemIndex!=NSNotFound) {
+					[_currentKeys removeObjectAtIndex:itemIndex];
 				}
 			}
 		}
@@ -241,15 +240,15 @@ void MonitorPID(NSNumber *pid) {
 				// object is truly dead
 				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
-				if (itemIdx != NSNotFound) {
-					[_currentKeys removeObjectAtIndex:itemIdx];
+				NSUInteger itemIndex = [_currentKeys indexOfObject:item];
+				if (itemIndex != NSNotFound) {
+					[_currentKeys removeObjectAtIndex:itemIndex];
 				}
 			}
 		}
 	}
 
-	[self processMessageCommonWithFocus: nil];
+	[self processMessageCommonWithFocus:nil];
 }
 
 - (void)setProperties:(NSString*)message userInfo:(NSDictionary*)userInfo {
@@ -264,8 +263,7 @@ void MonitorPID(NSNumber *pid) {
 - (void)setState:(NSUInteger)newState {
 	uint64_t value = newState;
 	static int token = -1;
-	if(token < 0)
-	{
+	if (token < 0) {
 		const char* notif = "libstatusbar_changed";
 		notify_register_check(notif, &token);
 	}
@@ -304,11 +302,11 @@ void MonitorPID(NSNumber *pid) {
 	[self stopTimer];
 
 	if (!locked) {
-		NSArray *titleStrings = [_currentMessage objectForKey: @"titleStrings"];
+		NSArray *titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 		if (titleStrings && [titleStrings count]) {
 			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 			CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
-			[self setState: 0];
+			[self setState:0];
 			[self enqueuePostChanged];
 		}
 	}
@@ -325,13 +323,15 @@ void MonitorPID(NSNumber *pid) {
 		CFRunLoopTimerInvalidate(timer);
 		CFRelease(timer);
 		timer = nil;
-		TitleStringIndex = -1;
+		//TitleStringIndex = -1;
 		[self enqueuePostChanged];
 	}
 }
 
 - (void)incrementTimer {
 	NSArray *titleStrings = [_currentMessage objectForKey:@"titleStrings"];
+
+	const char* notif = "libstatusbar_changed";
 
 	if (titleStrings && [titleStrings count]) {
 		/*
@@ -347,7 +347,6 @@ void MonitorPID(NSNumber *pid) {
 		uint64_t value;
 		static int token = -1;
 		if (token < 0) {
-			const char* notif = "libstatusbar_changed";
 			notify_register_check(notif, &token);
 		}
 		notify_get_state(token, &value);

@@ -10,16 +10,16 @@
 
 
 	CFRunLoopTimerRef timer;
-	bool timeHidden;
+	BOOL timeHidden;
 }
 
 + (instancetype)sharedInstance;
 
-- (id)init;
+- (instancetype)init;
 
 - (void)appDidExit:(NSString*)bundle;
 
-- (void)setProperties:(NSString*)message userInfo: (NSDictionary*)userInfo;
+- (void)setProperties:(NSString*)message userInfo:(NSDictionary*)userInfo;
 - (void)setProperties:(id)properties forItem:(NSString*)item bundle:(NSString*)bundle pid:(NSNumber*)pid;
 
 - (NSMutableDictionary*)currentMessage;

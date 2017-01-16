@@ -112,7 +112,8 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 %hook UIStatusBarLayoutManager
 - (id)_viewForItem:(id)arg1 {
 	if ([arg1 isKindOfClass:[%c(UIStatusBarCustomItem) class]]) {
-		return InitializeView(self, arg1);
+		UIStatusBarItemView* _view = InitializeView(self, arg1);
+		return _view;
 	}
 	return %orig;
 }
@@ -126,7 +127,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 			for (UIStatusBarCustomItem *item in customItems[_region]) {
 				UIStatusBarItemView *_view = InitializeView(self, item);
 				if (_view) {
-					[_itemViews addObject: _view];
+					[_itemViews addObject:_view];
 				}
 			}
 		}
@@ -196,7 +197,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 }
 
 - (CGRect)rectForItems:(id)arg1 {
-	NSInteger region = MSHookIvar<NSInteger>(self, "_region");
+	NSInteger &region = MSHookIvar<NSInteger>(self, "_region");
 
 	for (UIStatusBarCustomItem *item in customItems[region]) {
 		id visible = item.properties[@"visible"];

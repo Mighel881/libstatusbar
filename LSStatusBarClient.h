@@ -1,5 +1,5 @@
 @interface LSStatusBarClient : NSObject {
-	bool _isLocal;
+	BOOL _isLocal;
 	NSDictionary *_currentMessage;
 	NSMutableDictionary *_submittedMessages;
 
@@ -8,7 +8,7 @@
 
 + (instancetype)sharedInstance;
 
-- (id)init;
+- (instancetype)init;
 
 - (NSDictionary*)currentMessage;
 - (void)retrieveCurrentMessage;
@@ -18,6 +18,6 @@
 
 - (void)setProperties:(id)properties forItem:(NSString*)item;
 
-- (NSString*)titleStringAtIndex:(NSInteger)idx;
+- (NSString*)titleStringAtIndex:(NSInteger)index;
 
 @end

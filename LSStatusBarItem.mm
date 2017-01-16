@@ -7,7 +7,7 @@ NSMutableDictionary *sbitems = nil;
 @implementation LSStatusBarItem
 + (void)_updateProperties:(NSMutableDictionary*)dict forIdentifier:(NSString*)identifier {
 	if (!sbitems) {
-		sbitems = [NSMutableDictionary new];
+		sbitems = [[NSMutableDictionary alloc] init];
 	}
 
 	NSArray *idArray = [sbitems objectForKey:identifier];
@@ -28,14 +28,14 @@ NSMutableDictionary *sbitems = nil;
 	self = [super init];
 	if (self) {
 		if (!sbitems) {
-			sbitems = [NSMutableDictionary new];
+			sbitems = [[NSMutableDictionary alloc] init];
 		}
 
 		NSMutableArray *idArray = [sbitems objectForKey:identifier];
-		LSStatusBarItem *item = idArray ? [idArray count] ? [idArray objectAtIndex: 0] : nil : nil;
+		LSStatusBarItem *item = idArray ? ([idArray count] ? [idArray objectAtIndex: 0] : nil) : nil;
 		NSMutableDictionary *properties = item ? (NSMutableDictionary*)[item properties] : nil;
 		if (!properties) {
-			properties = [NSMutableDictionary new];
+			properties = [[NSMutableDictionary alloc] init];
 		}
 		_identifier = [identifier retain];
 
@@ -43,7 +43,7 @@ NSMutableDictionary *sbitems = nil;
 
 		NSNumber *align = [_properties objectForKey:@"alignment"];
 		if (!align) {
-			[_properties setObject:[NSNumber numberWithInt:alignment] forKey:@"alignment"];
+			[_properties setObject:@(alignment) forKey:@"alignment"];
 		} else if ([align intValue] != alignment) {
 			[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: You cannot specify a new alignment!"];
 		}
@@ -77,7 +77,7 @@ NSMutableDictionary *sbitems = nil;
 			if ([idArray count] == 0) {
 				// item is no longer in use by this process, let the server know
 				[LSStatusBarClient.sharedInstance setProperties:nil forItem:_identifier];
-				[sbitems removeObjectForKey:_identifier];
+				//[sbitems removeObjectForKey:_identifier];
 			}
 		}
 		[_identifier release];
@@ -97,7 +97,7 @@ NSMutableDictionary *sbitems = nil;
 	[_properties release];
 
 	if (!dict) {
-		_properties = [NSMutableDictionary new];
+		_properties = [[NSMutableDictionary alloc] init];
 	} else {
 		_properties = [dict mutableCopy];
 	}
@@ -110,7 +110,7 @@ NSMutableDictionary *sbitems = nil;
 }
 
 - (void)setVisible:(BOOL)visible {
-	[_properties setObject:[NSNumber numberWithBool:visible] forKey:@"visible"];
+	[_properties setObject:@(visible) forKey:@"visible"];
 
 	if (!_manualUpdate) {
 		[self update];
@@ -125,7 +125,7 @@ NSMutableDictionary *sbitems = nil;
 - (void)setHidesTime:(BOOL)hidesTime {
 	NSNumber *oldTime = [_properties objectForKey:@"imageName"];
 	if ([oldTime boolValue] != hidesTime) {
-		[_properties setObject:[NSNumber numberWithBool:hidesTime] forKey:@"hidesTime"];
+		[_properties setObject:@(hidesTime) forKey:@"hidesTime"];
 
 		if (!_manualUpdate) {
 			[self update];

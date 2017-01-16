@@ -74,9 +74,9 @@ extern "C" mach_port_t bootstrap_port;
 	}
 }
 
-- (NSString*)titleStringAtIndex:(NSInteger)idx {
-	if (idx < _titleStrings.count && idx >= 0) {
-		return [_titleStrings objectAtIndex:idx];
+- (NSString*)titleStringAtIndex:(NSInteger)index {
+	if (index < _titleStrings.count && index >= 0) {
+		return [_titleStrings objectAtIndex:index];
 	}
 	return nil;
 }
@@ -84,11 +84,8 @@ extern "C" mach_port_t bootstrap_port;
 - (BOOL)processCurrentMessage {
 	BOOL ret = NO;
 	if (!_currentMessage) {
-		HBLogDebug(@"No currentMessage");
 		return NO;
 	}
-
-	HBLogDebug(@"%@", _currentMessage);
 
 	NSMutableArray *processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
@@ -137,12 +134,8 @@ extern "C" mach_port_t bootstrap_port;
 	if (processedKeys && [processedKeys count]) {
 		ret = YES;
 		for (NSString *key in processedKeys) {
-			UIStatusBarCustomItem *item = nil;
-			if ([%c(UIStatusBarItem) respondsToSelector:@selector(itemWithType:idiom:)]) {
-				item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
-			} else {
-				item = [%c(UIStatusBarItem) itemWithType:keyidx++];
-			}
+			UIStatusBarCustomItem *item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
+
 			[item setIndicatorName:key];
 
 			NSObject *properties = [_currentMessage objectForKey:key];
@@ -153,12 +146,12 @@ extern "C" mach_port_t bootstrap_port;
 					customItems[0] = [[NSMutableArray alloc] init];
 				}
 				[customItems[0] addObject:item];
-			} else if([item rightOrder]) {
+			} else if ([item rightOrder]) {
 				if(!customItems[1]) {
 					customItems[1] = [[NSMutableArray alloc] init];
 				}
 				[customItems[1] addObject:item];
-			} else if(item) {
+			} else if (item) {
 				if(!customItems[2]) {
 					customItems[2] = [[NSMutableArray alloc] init];
 				}
@@ -172,7 +165,7 @@ extern "C" mach_port_t bootstrap_port;
 }
 
 - (void)updateStatusBar {
-	if(!%c(UIApplication)) {
+	if (!%c(UIApplication)) {
 		return;
 	}
 	[self retrieveCurrentMessage];
@@ -180,15 +173,15 @@ extern "C" mach_port_t bootstrap_port;
 	// need a decent guard band because we do call before UIApp exists
 	if ([self processCurrentMessage]) {
 		if (%c(UIApplication) && [%c(UIApplication) sharedApplication]) {
-			UIStatusBar *sb = [[%c(UIApplication) sharedApplication] statusBar];
+			UIStatusBar *statusBar = [[%c(UIApplication) sharedApplication] statusBar];
 
-			if (!sb) {
+			if (!statusBar) {
 				return;
 			}
 
-			UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(sb, "_foregroundView");
+			UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(statusBar, "_foregroundView");
 			if (_foregroundView) {
-				[sb forceUpdateData:NO];
+				[statusBar forceUpdateData:NO];
 
 				if (_isLocal) {
 					if (%c(SBBulletinListController)) {
@@ -200,9 +193,9 @@ extern "C" mach_port_t bootstrap_port;
 					}
 
 					if (%c(SBNotificationCenterController)) {
-						SBNotificationCenterViewController *vc = [[%c(SBNotificationCenterController) sharedInstance] viewController];
-						if (vc) {
-							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(vc, "_statusBar");
+						SBNotificationCenterViewController *viewController = [[%c(SBNotificationCenterController) sharedInstance] viewController];
+						if (viewController) {
+							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(viewController, "_statusBar");
 
 							if (_statusBar) {
 								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
@@ -233,7 +226,7 @@ extern "C" mach_port_t bootstrap_port;
 		if (_isLocal) {
 			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt:0]];
 		} else {
-			NSNumber *pid = [NSNumber numberWithInt:getpid()];
+			NSNumber *pid = @(getpid());
 
 			NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:4];
 			if (item) {
