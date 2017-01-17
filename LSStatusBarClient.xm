@@ -74,8 +74,8 @@ extern "C" mach_port_t bootstrap_port;
 	}
 }
 
-- (NSString*)titleStringAtIndex:(NSInteger)index {
-	if (index < _titleStrings.count && index >= 0) {
+- (NSString*)titleStringAtIndex:(int)index {
+	if (index < (int)_titleStrings.count && index >= 0) {
 		return [_titleStrings objectAtIndex:index];
 	}
 	return nil;
@@ -92,13 +92,13 @@ extern "C" mach_port_t bootstrap_port;
 	[_titleStrings release];
   _titleStrings = [[_currentMessage objectForKey:@"titleStrings"] retain];
 
-	NSInteger keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
+	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
 	extern NSMutableArray *customItems[3];
 
 	for (int i=0; i<3; i++) {
 		if (customItems[i]) {
-			NSInteger cnt = [customItems[i] count]-1;
+			int cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
 				UIStatusBarCustomItem *item = [customItems[i] objectAtIndex:cnt];
 				//UIStatusBarCustomItem *item = [allCustomItems objectAtIndex: cnt];
@@ -117,7 +117,7 @@ extern "C" mach_port_t bootstrap_port;
 				} else {
 					[processedKeys removeObject:indicatorName];
 
-					NSInteger &type(MSHookIvar<NSInteger>(item, "_type"));
+					int &type(MSHookIvar<int>(item, "_type"));
 					if (type > keyidx) {
 						keyidx = type;
 					}
@@ -224,7 +224,7 @@ extern "C" mach_port_t bootstrap_port;
 
 		NSString *bundleId = NSBundle.mainBundle.bundleIdentifier;
 		if (_isLocal) {
-			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt:0]];
+			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:@0];
 		} else {
 			NSNumber *pid = @(getpid());
 

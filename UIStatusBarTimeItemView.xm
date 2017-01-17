@@ -40,7 +40,7 @@
 	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
 	NSMutableString *timeString = [_timeString mutableCopy];
 
-	CGFloat maxlen;
+	float maxlen;
 
 	CGSize screenSize = UIScreen.mainScreen.bounds.size;
 	maxlen = screenSize.width * 0.6f;

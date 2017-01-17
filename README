@@ -13,6 +13,7 @@ It contains some improvements and fixes including:
 Negative changes:
 - Dropped armv6 support (because I don't have the SDKs for it)
 - (May have) dropped <iOS 7 support
+- And I cant seem to fix the disappearing issue
 
 Only major problem is Statusbar not updating but eh whatever.
 (And somebody plz make %sublcass be able to add ivars)

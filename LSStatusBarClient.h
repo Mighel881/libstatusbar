@@ -18,6 +18,6 @@
 
 - (void)setProperties:(id)properties forItem:(NSString*)item;
 
-- (NSString*)titleStringAtIndex:(NSInteger)index;
+- (NSString*)titleStringAtIndex:(int)index;
 
 @end

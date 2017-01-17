@@ -11,7 +11,7 @@ NSMutableArray *customItems[3];	 // left, right, center
 #pragma mark UIStatusBar* Hooks
 
 %hook UIStatusBarItem
-+ (id)itemWithType:(NSInteger)arg1 {
++ (id)itemWithType:(int)arg1 {
 	id ret = %orig;
 	if (!ret) {
 		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
@@ -19,7 +19,7 @@ NSMutableArray *customItems[3];	 // left, right, center
 	return ret;
 }
 
-+ (id)itemWithType:(NSInteger)arg1 idiom:(NSInteger)arg2 {
++ (id)itemWithType:(int)arg1 idiom:(int)arg2 {
 	id ret = %orig;
 	if (!ret) {
 		ret = [(UIStatusBarCustomItem*)[%c(UIStatusBarCustomItem) alloc] initWithType:arg1];
@@ -71,11 +71,11 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 
 	UIStatusBarLayoutManager *(&layoutManagers)[3](MSHookIvar<UIStatusBarLayoutManager*[3]>(self, "_layoutManagers"));
 
-	CGFloat boundsWidth = self.bounds.size.width;
+	float boundsWidth = [self bounds].size.width;
 	NSMutableArray *center = [ret objectForKey:@(2)];
 	CGFloat centerWidth = [layoutManagers[2] sizeNeededForItems:center];
 
-	CGFloat edgeWidth = (boundsWidth - centerWidth) * 0.5f;
+	float edgeWidth = (boundsWidth - centerWidth) * 0.5f;
 
 	for (int i = 0; i < 2; i++) {
 		NSMutableArray *arr = [ret objectForKey:@(i)];
@@ -122,7 +122,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 	NSMutableArray *_itemViews = %orig;
 
 	if (_itemViews) {
-		NSInteger _region = MSHookIvar<NSInteger>(self, "_region");
+		int _region = MSHookIvar<int>(self, "_region");
 		if (_region < 3 && customItems[_region]) {
 			for (UIStatusBarCustomItem *item in customItems[_region]) {
 				UIStatusBarItemView *_view = InitializeView(self, item);
@@ -140,7 +140,7 @@ UIStatusBarItemView* InitializeView(UIStatusBarLayoutManager *self, id item) {
 void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 	UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(self, "_foregroundView");
 
-	CGFloat startPosition = [self _startPosition];
+	float startPosition = [self _startPosition];
 	for (UIStatusBarItemView *view in [self _itemViewsSortedForLayout]) {
 		if (!view.superview) {
 			/*[view setVisible: NO];
@@ -165,7 +165,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 			[_foregroundView addSubview:view];
 		}
 
-		NSInteger type = view.item.type;
+		int type = [[view item] type];
 		if (type) {
 			startPosition = [self _positionAfterPlacingItemView:view startPosition:startPosition firstView:YES];
 		}
@@ -230,7 +230,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 	// use this only for starting client
 	// register as client - make sure SpringBoard is running
 	// UIKit should still not exist.../yet/
-	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
+	//int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
 		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}
@@ -239,7 +239,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 - (void)applicationDidResume {
 	%orig;
 
-	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
+	//int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
 		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}
@@ -248,7 +248,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 - (void)workspace:(id)arg1 didLaunchWithCompletion:(id)arg2 {
 	%orig;
 
-	int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
+	//int (*SBSSpringBoardServerPort)() = (int (*)())dlsym(RTLD_DEFAULT, "SBSSpringBoardServerPort");
 	if (%c(SpringBoard) || SBSSpringBoardServerPort()) {
 		[LSStatusBarClient.sharedInstance updateStatusBar];
 	}

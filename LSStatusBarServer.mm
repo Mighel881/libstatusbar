@@ -134,7 +134,7 @@ void MonitorPID(NSNumber *pid) {
 }
 
 - (void)registerPid:(NSNumber*)thepid {
-	NSInteger pid = [thepid intValue];
+	int pid = [thepid intValue];
 	if (!pid) {
 		return;
 	}
@@ -194,7 +194,7 @@ void MonitorPID(NSNumber *pid) {
 }
 
 - (void)pidDidExit:(NSNumber*)pid {
-	NSInteger nKeys = [_currentKeys count];
+	int nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
 		NSString *item = [_currentKeys objectAtIndex:i];
 
@@ -223,7 +223,7 @@ void MonitorPID(NSNumber *pid) {
 }
 
 - (void)appDidExit:(NSString*)bundle {
-	NSInteger nKeys = [_currentKeys count];
+	int nKeys = [_currentKeys count];
 	for (int i=nKeys - 1; i>=0; i--) {
 		NSString *item = [_currentKeys objectAtIndex:i];
 
