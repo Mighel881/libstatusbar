@@ -1,5 +1,5 @@
 @interface LSStatusBarClient : NSObject {
-	BOOL _isLocal;
+	bool _isLocal;
 	NSDictionary *_currentMessage;
 	NSMutableDictionary *_submittedMessages;
 
@@ -12,7 +12,7 @@
 
 - (NSDictionary*)currentMessage;
 - (void)retrieveCurrentMessage;
-- (BOOL)processCurrentMessage;
+- (bool)processCurrentMessage;
 - (void)resubmitContent;
 - (void)updateStatusBar;
 

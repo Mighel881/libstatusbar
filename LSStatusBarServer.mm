@@ -3,14 +3,14 @@
 #import "LSStatusBarServer.h"
 #import "LSStatusBarItem.h"
 
-//NSUInteger TitleStringIndex = -1;
+NSUInteger TitleStringIndex = -1;
 
 void updateLockStatus(CFNotificationCenterRef center, LSStatusBarServer *server) {
 	[server updateLockStatus];
 }
 
 void incrementTimer() {
-	[LSStatusBarServer.sharedInstance incrementTimer];
+	[[LSStatusBarServer sharedInstance] incrementTimer];
 }
 
 @implementation LSStatusBarServer
@@ -42,7 +42,7 @@ void incrementTimer() {
 		CFNotificationCenterRef darwin = CFNotificationCenterGetDarwinNotifyCenter();
 		CFNotificationCenterAddObserver(darwin, (const void *)self, (CFNotificationCallback) updateLockStatus, CFSTR("com.apple.springboard.lockstate"), (const void *)self, CFNotificationSuspensionBehaviorDeliverImmediately);
 
-		CFNotificationCenterPostNotification(darwin, CFSTR("LSBDidLaunchNotification"), nil, nil, YES);
+		notify_post("LSBDidLaunchNotification");
 	}
 	return self;
 }
@@ -52,7 +52,7 @@ void incrementTimer() {
 }
 
 - (void)postChanged {
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("libstatusbar_changed"), nil, nil, YES);
+	notify_post("libstatusbar_changed");
 }
 
 - (void)enqueuePostChanged {
@@ -72,6 +72,7 @@ void incrementTimer() {
 		if (!dict || ![dict isKindOfClass:[NSDictionary class]]) {
 			continue;
 		}
+
 		NSNumber *alignment = [dict objectForKey:@"alignment"];
 		if (alignment && ((StatusBarAlignment) [alignment intValue]) == StatusBarAlignmentCenter) {
 			NSNumber *visible = [dict objectForKey:@"visible"];
@@ -107,16 +108,18 @@ void incrementTimer() {
 static void NoteExitKQueueCallback(
     CFFileDescriptorRef f,
     CFOptionFlags       callBackTypes,
-    NSNumber  *             pidinfo
-) {
-	  [LSStatusBarServer.sharedInstance pidDidExit:[pidinfo autorelease]];
+    NSNumber *              pidinfo
+)
+{
+    [[LSStatusBarServer sharedInstance] pidDidExit:[pidinfo autorelease]];
 }
 
 
 void MonitorPID(NSNumber *pid) {
+    //FILE *                f;
     int                     kq;
     struct kevent           changes;
-  	CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
+    CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
     CFRunLoopSourceRef      rls;
 
     kq = kqueue();
@@ -164,7 +167,7 @@ void MonitorPID(NSNumber *pid) {
 		[_currentKeyUsage setObject:pids forKey:item];
 	}
 
-	NSUInteger itemIndex = [_currentKeys indexOfObject:item];
+	NSUInteger itemIdx = [_currentKeys indexOfObject:item];
 
 	if (properties) {
 		[_currentMessage setValue:properties forKey:item];
@@ -173,7 +176,7 @@ void MonitorPID(NSNumber *pid) {
 			[pids addObject:pid];
 		}
 
-		if (itemIndex == NSNotFound) {
+		if (itemIdx == NSNotFound) {
 			[_currentKeys addObject:item];
 		}
 	} else {
@@ -183,8 +186,8 @@ void MonitorPID(NSNumber *pid) {
 			// object is truly dead
 			[_currentMessage setValue:nil forKey:item];
 
-			if (itemIndex!=NSNotFound) {
-				[_currentKeys removeObjectAtIndex:itemIndex];
+			if (itemIdx!=NSNotFound) {
+				[_currentKeys removeObjectAtIndex:itemIdx];
 			}
 		}
 	}
@@ -211,9 +214,9 @@ void MonitorPID(NSNumber *pid) {
 				// object is truly dead
 				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIndex = [_currentKeys indexOfObject:item];
-				if (itemIndex!=NSNotFound) {
-					[_currentKeys removeObjectAtIndex:itemIndex];
+				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
+				if (itemIdx!=NSNotFound) {
+					[_currentKeys removeObjectAtIndex:itemIdx];
 				}
 			}
 		}
@@ -240,9 +243,9 @@ void MonitorPID(NSNumber *pid) {
 				// object is truly dead
 				[_currentMessage setValue:nil forKey:item];
 
-				NSUInteger itemIndex = [_currentKeys indexOfObject:item];
-				if (itemIndex != NSNotFound) {
-					[_currentKeys removeObjectAtIndex:itemIndex];
+				NSUInteger itemIdx = [_currentKeys indexOfObject:item];
+				if (itemIdx != NSNotFound) {
+					[_currentKeys removeObjectAtIndex:itemIdx];
 				}
 			}
 		}
@@ -261,14 +264,7 @@ void MonitorPID(NSNumber *pid) {
 }
 
 - (void)setState:(NSUInteger)newState {
-	uint64_t value = newState;
-	static int token = -1;
-	if (token < 0) {
-		const char* notif = "libstatusbar_changed";
-		notify_register_check(notif, &token);
-	}
-	notify_set_state(token, value);
-	//_currentMessage[@"TitleStringIndex"] = @(newState);
+	_currentMessage[@"TitleStringIndex"] = @(newState);
 	[self enqueuePostChanged];
 }
 
@@ -290,7 +286,8 @@ void MonitorPID(NSNumber *pid) {
 	}
 
 	// check lock status
-	uint64_t locked; {
+	uint64_t locked;
+	{
 		static int token = -1;
 		if (token < 0) {
 			notify_register_check("com.apple.springboard.lockstate", &token);
@@ -306,8 +303,10 @@ void MonitorPID(NSNumber *pid) {
 		if (titleStrings && [titleStrings count]) {
 			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent()+3.5f, 3.5f, 0, 0, (CFRunLoopTimerCallBack) incrementTimer, NULL);
 			CFRunLoopAddTimer(CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
-			[self setState:0];
-			[self enqueuePostChanged];
+			{
+				[self setState:0];
+				[self enqueuePostChanged];
+			}
 		}
 	}
 }
@@ -316,14 +315,14 @@ void MonitorPID(NSNumber *pid) {
 	// reset the statusbar state
 	if (timer) {
 		[self enqueuePostChanged];
-	}// only post a notification if the timer was running
+	}
 	[self setState:NSNotFound];
 	// kill timer
 	if (timer) {
 		CFRunLoopTimerInvalidate(timer);
 		CFRelease(timer);
 		timer = nil;
-		//TitleStringIndex = -1;
+		TitleStringIndex = -1;
 		[self enqueuePostChanged];
 	}
 }
@@ -331,34 +330,14 @@ void MonitorPID(NSNumber *pid) {
 - (void)incrementTimer {
 	NSArray *titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
-	const char* notif = "libstatusbar_changed";
-
 	if (titleStrings && [titleStrings count]) {
-		/*
-		NSInteger value = TitleStringIndex; // -1 ++ = 0. so it should work
+		int value = TitleStringIndex; // -1 ++ = 0. so it should work
 		TitleStringIndex++;
-		if (timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count]) ) {
-			value = 0;
-			TitleStringIndex = -1;
-
-		}
-		[self setState:value];
-		*/
-		uint64_t value;
-		static int token = -1;
-		if (token < 0) {
-			notify_register_check(notif, &token);
-		}
-		notify_get_state(token, &value);
-
-		value++;
 		if (timeHidden ? (value >= [titleStrings count]) : (value > [titleStrings count])) {
 			value = 0;
+			TitleStringIndex = -1;
 		}
-
-		notify_set_state(token, value);
-
-		[self enqueuePostChanged];
+		[self setState:value];
 	} else {
 		[self stopTimer];
 	}

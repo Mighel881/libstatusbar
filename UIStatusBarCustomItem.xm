@@ -5,8 +5,7 @@
 //%subclass UIStatusBarCustomItem : UIStatusBarItem
 %hook UIStatusBarCustomItem
 - (int)type {
-	//return MSHookIvar<int>(self, "_type");
-	return 0;
+	return MSHookIvar<int>(self, "_type");
 }
 
 - (int)leftOrder {
@@ -35,19 +34,18 @@
 }
 
 - (int)priority {
-	//return %orig;
-	return 0;
+	return %orig;
+	//return 0;
 }
 
 %new
 - (NSDictionary*)properties {
-	NSDictionary *&_properties = MSHookIvar<NSDictionary*>(self, "_properties");
-	return _properties;
+	return MSHookIvar<NSDictionary*>(self, "_properties");
 }
 
 %new
 - (void)setProperties:(NSDictionary*)properties {
-	NSDictionary *&_properties = MSHookIvar<NSDictionary*>(self, "_properties");
+	__strong NSDictionary* &_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
 	[_properties release];
 	_properties = [properties retain];
 }
@@ -76,13 +74,13 @@
 			return name;
 		}
 	}
-	NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
-	return _indicatorName;
+
+	return MSHookIvar<NSString*>(self, "_indicatorName");
 }
 
 %new
-- (void)setIndicatorName:(NSString*) name {
-	NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
+-(void)setIndicatorName:(NSString*)name {
+	__strong NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
 	[_indicatorName release];
 	_indicatorName = [name retain];
 }

@@ -10,8 +10,8 @@
 @end
 
 @interface UIStatusBarItemView (lss)
-- (NSInteger)legibilityStyle;
-- (CGFloat)legibilityStrength;
+- (int)legibilityStyle;
+- (float)legibilityStrength;
 @end
 
 @interface UIStatusBarCustomItemView (fgs)
@@ -24,7 +24,7 @@ NSMutableDictionary *cachedImages[5];
 %subclass UIStatusBarCustomItemView : UIStatusBarItemView
 - (_UILegibilityImageSet*)contentsImage {
 	UIStatusBarForegroundStyleAttributes *fs = [self foregroundStyle];
-	NSString *itemName = [[self item] indicatorName];
+	NSString *itemName = self.item.indicatorName;
 
 	UIColor *tintColor = [fs tintColor];
 
@@ -41,22 +41,22 @@ NSMutableDictionary *cachedImages[5];
 		}
 	}
 
-	BOOL isBlack = [tintColor isEqual:[UIColor blackColor]];
-	BOOL isLockscreen = [fs isKindOfClass:%c(UIStatusBarLockScreenForegroundStyleAttributes)];
+	bool isBlack = [tintColor isEqual:[UIColor blackColor]];
+	bool isLockscreen = [fs isKindOfClass:objc_getClass("UIStatusBarLockScreenForegroundStyleAttributes")];
 
-	UIImage *image_color = [%c(UIImage) kitImageNamed:[NSString stringWithFormat:@"%@_%@_Color", isLockscreen ?  @"LockScreen" : (isBlack ? @"Black" : @"White"), itemName]];
+	UIImage *image_color = [UIImage kitImageNamed:[NSString stringWithFormat:@"%@_%@_Color", isLockscreen ? @"LockScreen" : (isBlack ? @"Black" : @"White"), itemName]];
 	if (!image_color) {
 		NSBundle *kitbundle = [NSBundle bundleWithPath:@"/System/Library/Frameworks/UIKit.framework"];
-		image_color = [%c(UIImage) imageNamed:[NSString stringWithFormat:@"%@_%@_Color", isLockscreen ? @"LockScreen" : (isBlack ? @"Black" : @"White"), itemName] inBundle:kitbundle];
+		image_color = [UIImage imageNamed:[NSString stringWithFormat:@"%@_%@_Color", isLockscreen ? @"LockScreen" : (isBlack ? @"Black" : @"White"), itemName] inBundle:kitbundle];
 	}
 
 	UIImage *image_base = 0;
 	if (!image_color) {
-		image_base = [%c(UIImage) kitImageNamed:expandedName_default];
+		image_base = [UIImage kitImageNamed:expandedName_default];
 
 		if (!image_base) {
 			NSBundle *kitbundle = [NSBundle bundleWithPath:@"/System/Library/Frameworks/UIKit.framework"];
-			image_base = [%c(UIImage) imageNamed:expandedName_default inBundle:kitbundle];
+			image_base = [UIImage imageNamed:expandedName_default inBundle:kitbundle];
 		}
 	}
 

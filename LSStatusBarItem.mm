@@ -2,12 +2,12 @@
 #import "LSStatusBarItem.h"
 #import "LSStatusBarClient.h"
 
-NSMutableDictionary *sbitems = nil;
+NSMutableDictionary* sbitems = nil;
 
 @implementation LSStatusBarItem
 + (void)_updateProperties:(NSMutableDictionary*)dict forIdentifier:(NSString*)identifier {
 	if (!sbitems) {
-		sbitems = [[NSMutableDictionary alloc] init];
+		sbitems = [NSMutableDictionary new];
 	}
 
 	NSArray *idArray = [sbitems objectForKey:identifier];
@@ -25,25 +25,26 @@ NSMutableDictionary *sbitems = nil;
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Alignment not specified"];
 	}
 
-	self = [super init];
-	if (self) {
+	if ((self = [super init])) {
+
 		if (!sbitems) {
-			sbitems = [[NSMutableDictionary alloc] init];
+			sbitems = [NSMutableDictionary new];
 		}
 
 		NSMutableArray *idArray = [sbitems objectForKey:identifier];
-		LSStatusBarItem *item = idArray ? ([idArray count] ? [idArray objectAtIndex: 0] : nil) : nil;
+		LSStatusBarItem *item = idArray ? ([idArray count] ? [idArray objectAtIndex:0] : nil) : nil;
 		NSMutableDictionary *properties = item ? (NSMutableDictionary*)[item properties] : nil;
 		if (!properties) {
-			properties = [[NSMutableDictionary alloc] init];
+			properties = [NSMutableDictionary new];
 		}
+
 		_identifier = [identifier retain];
 
-		[self _setProperties:properties];
+		[self _setProperties: properties];
 
 		NSNumber *align = [_properties objectForKey:@"alignment"];
 		if (!align) {
-			[_properties setObject:@(alignment) forKey:@"alignment"];
+			[_properties setObject:[NSNumber numberWithInt:alignment] forKey:@"alignment"];
 		} else if ([align intValue] != alignment) {
 			[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: You cannot specify a new alignment!"];
 		}
@@ -52,7 +53,7 @@ NSMutableDictionary *sbitems = nil;
 		if (!idArray) {
 			// this creates a retain/release-less NSMutableArray
 			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-			[sbitems setObject:idArray forKey:identifier];
+			[sbitems setObject: idArray forKey: identifier];
 			CFRelease(idArray);
 		}
 
@@ -76,12 +77,12 @@ NSMutableDictionary *sbitems = nil;
 
 			if ([idArray count] == 0) {
 				// item is no longer in use by this process, let the server know
-				[LSStatusBarClient.sharedInstance setProperties:nil forItem:_identifier];
-				//[sbitems removeObjectForKey:_identifier];
+				[[LSStatusBarClient sharedInstance] setProperties:nil forItem:_identifier];
+				[sbitems removeObjectForKey:_identifier];
 			}
 		}
 		[_identifier release];
- 		[_properties release];
+		[_properties release];
 	}
 	[super dealloc];
 }
@@ -97,7 +98,7 @@ NSMutableDictionary *sbitems = nil;
 	[_properties release];
 
 	if (!dict) {
-		_properties = [[NSMutableDictionary alloc] init];
+		_properties = [NSMutableDictionary new];
 	} else {
 		_properties = [dict mutableCopy];
 	}
@@ -110,7 +111,7 @@ NSMutableDictionary *sbitems = nil;
 }
 
 - (void)setVisible:(BOOL)visible {
-	[_properties setObject:@(visible) forKey:@"visible"];
+	[_properties setObject:[NSNumber numberWithBool:visible] forKey:@"visible"];
 
 	if (!_manualUpdate) {
 		[self update];
@@ -125,7 +126,7 @@ NSMutableDictionary *sbitems = nil;
 - (void)setHidesTime:(BOOL)hidesTime {
 	NSNumber *oldTime = [_properties objectForKey:@"imageName"];
 	if ([oldTime boolValue] != hidesTime) {
-		[_properties setObject:@(hidesTime) forKey:@"hidesTime"];
+		[_properties setObject:[NSNumber numberWithBool:hidesTime] forKey:@"hidesTime"];
 
 		if (!_manualUpdate) {
 			[self update];
@@ -167,7 +168,7 @@ NSMutableDictionary *sbitems = nil;
 	NSString *oldTitle = [_properties objectForKey:@"titleString"];
 
 	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString:string])) {
-		//HBLogDebug(@"oldTitle = %@, newTitle = %@", oldTitle, string);
+		//NSLog(@"oldTitle = %@, newTitle = %@", oldTitle, string);
 
 		[_properties setValue:string forKey:@"titleString"];
 
@@ -183,6 +184,7 @@ NSMutableDictionary *sbitems = nil;
 	if (oldClass) {
 		[NSException raise:NSInternalInconsistencyException format:@"LSStatusBarItem: Item already has a custom view class!"];
 	}
+
 	[_properties setValue:customViewClass forKey:@"customViewClass"];
 
 	if (!_manualUpdate) {
@@ -208,7 +210,7 @@ NSMutableDictionary *sbitems = nil;
 }
 
 - (void)update {
-	[LSStatusBarClient.sharedInstance setProperties:_properties forItem:_identifier];
+	[[LSStatusBarClient sharedInstance] setProperties:_properties forItem:_identifier];
 	[LSStatusBarItem _updateProperties:_properties forIdentifier:_identifier];
 }
 

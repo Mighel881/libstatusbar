@@ -6,24 +6,14 @@
 @end
 
 %hook UIStatusBarTimeItemView
-- (BOOL)updateForNewData:(id)arg1 actions:(NSInteger)arg2 {
-	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
-	NSString *oldString = [_timeString retain];
+- (BOOL)updateForNewData:(id)arg1 actions:(int)arg2 {
+	__strong NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSString *oldString = _timeString;
 
-	//NSInteger index = [[LSStatusBarClient.sharedInstance currentMessage][@"TitleStringIndex"] intValue];
-
-	int index;
-	uint64_t value;
-	const char* notif = "libstatusbar_changed";
-	static int token = 0;
-	if (!token) {
-		notify_register_check(notif, &token);
-	}
-	notify_get_state(token, &value);
-	index = value;
+	int idx = [[[LSStatusBarClient sharedInstance] currentMessage][@"TitleStringIndex"] intValue];
 
 	// Fetch current string
-	_timeString = [[LSStatusBarClient.sharedInstance titleStringAtIndex:index] retain];
+	_timeString = [[LSStatusBarClient sharedInstance] titleStringAtIndex:idx];
 
 	// If not...
 	if (!_timeString) {
@@ -37,13 +27,13 @@
 }
 
 - (_UILegibilityImageSet*)contentsImage {
-	NSString *&_timeString = MSHookIvar<NSString*>(self, "_timeString");
+	__strong NSString* &_timeString(MSHookIvar<NSString*>(self, "_timeString"));
 	NSMutableString *timeString = [_timeString mutableCopy];
 
 	float maxlen;
 
-	CGSize screenSize = UIScreen.mainScreen.bounds.size;
-	maxlen = screenSize.width * 0.6f;
+	CGSize screenSz = UIScreen.mainScreen.bounds.size;
+	maxlen = screenSz.width * 0.6f;
 
 	// ellipsize strings if they're too long
 	if ([timeString sizeWithAttributes:@{NSFontAttributeName:[self textFont]}].width > maxlen) {

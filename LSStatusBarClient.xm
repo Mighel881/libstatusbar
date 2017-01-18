@@ -5,7 +5,7 @@
 #import "common.h"
 
 @interface UIStatusBarItem (libstatusbar)
-+ (id)itemWithType:(NSInteger)type;
++ (id)itemWithType:(int)type;
 @end
 
 @interface SBBulletinListController
@@ -26,8 +26,7 @@ void ResubmitContent(CFNotificationCenterRef center, LSStatusBarClient *client) 
 	[client updateStatusBar];
 }
 
-extern "C" kern_return_t
-bootstrap_look_up(mach_port_t bp, const char* service_name, mach_port_t *sp);
+extern "C" kern_return_t bootstrap_look_up(mach_port_t bp, const char* service_name, mach_port_t *sp);
 extern "C" mach_port_t bootstrap_port;
 
 @implementation LSStatusBarClient
@@ -75,14 +74,13 @@ extern "C" mach_port_t bootstrap_port;
 }
 
 - (NSString*)titleStringAtIndex:(int)index {
-	if (index < (int)_titleStrings.count && index >= 0) {
+	if (index < _titleStrings.count && index >= 0) {
 		return [_titleStrings objectAtIndex:index];
 	}
 	return nil;
 }
 
-- (BOOL)processCurrentMessage {
-	BOOL ret = NO;
+- (bool)processCurrentMessage {
 	if (!_currentMessage) {
 		return NO;
 	}
@@ -90,18 +88,18 @@ extern "C" mach_port_t bootstrap_port;
 	NSMutableArray *processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
 	[_titleStrings release];
-  _titleStrings = [[_currentMessage objectForKey:@"titleStrings"] retain];
+	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 
 	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
 
-	extern NSMutableArray *customItems[3];
+	extern NSMutableArray* customItems[3];
 
 	for (int i=0; i<3; i++) {
 		if (customItems[i]) {
 			int cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
 				UIStatusBarCustomItem *item = [customItems[i] objectAtIndex:cnt];
-				//UIStatusBarCustomItem *item = [allCustomItems objectAtIndex: cnt];
+				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
 
 				NSString *indicatorName = [item indicatorName];
 
@@ -111,7 +109,6 @@ extern "C" mach_port_t bootstrap_port;
 				}
 
 				if (!properties) {
-					ret = YES;
 					[item removeAllViews];
 					[customItems[i] removeObjectAtIndex:cnt];
 				} else {
@@ -121,6 +118,7 @@ extern "C" mach_port_t bootstrap_port;
 					if (type > keyidx) {
 						keyidx = type;
 					}
+
 					item.properties = [properties isKindOfClass:[NSDictionary class]] ? (NSDictionary*) properties : nil;
 				}
 			}
@@ -132,11 +130,15 @@ extern "C" mach_port_t bootstrap_port;
 	keyidx++;
 
 	if (processedKeys && [processedKeys count]) {
-		ret = YES;
 		for (NSString *key in processedKeys) {
-			UIStatusBarCustomItem *item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
+			UIStatusBarCustomItem *item = nil;
+			if ([%c(UIStatusBarItem) respondsToSelector:@selector(itemWithType:idiom:)]) {
+				item = [%c(UIStatusBarItem) itemWithType:keyidx++ idiom:0];
+			} else {
+				item = [%c(UIStatusBarItem) itemWithType:keyidx++];
+			}
 
-			[item setIndicatorName:key];
+			[item setIndicatorName: key];
 
 			NSObject *properties = [_currentMessage objectForKey:key];
 			item.properties = [properties isKindOfClass:[NSDictionary class]] ? (NSDictionary*) properties : nil;
@@ -152,22 +154,23 @@ extern "C" mach_port_t bootstrap_port;
 				}
 				[customItems[1] addObject:item];
 			} else if (item) {
-				if(!customItems[2]) {
+				if (!customItems[2]) {
 					customItems[2] = [[NSMutableArray alloc] init];
 				}
 				[customItems[2] addObject:item];
 			}
 		}
 	}
-	ret = YES;
+
 	[processedKeys release];
-	return ret;
+	return YES;
 }
 
-- (void)updateStatusBar {
+- (void) updateStatusBar {
 	if (!%c(UIApplication)) {
 		return;
 	}
+
 	[self retrieveCurrentMessage];
 
 	// need a decent guard band because we do call before UIApp exists
@@ -200,6 +203,7 @@ extern "C" mach_port_t bootstrap_port;
 							if (_statusBar) {
 								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
 								// bypass and directly do it.
+
 								void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
 								[_statusBar forceUpdateToData:&_currentRawData animated:NO];
 							}
@@ -222,11 +226,11 @@ extern "C" mach_port_t bootstrap_port;
 			[_submittedMessages removeObjectForKey:item];
 		}
 
-		NSString *bundleId = NSBundle.mainBundle.bundleIdentifier;
+		NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
 		if (_isLocal) {
-			[LSStatusBarServer.sharedInstance setProperties:properties forItem:item bundle:bundleId pid:@0];
+			[[LSStatusBarServer sharedInstance] setProperties:properties forItem:item bundle:bundleId pid:[NSNumber numberWithInt:0]];
 		} else {
-			NSNumber *pid = @(getpid());
+			NSNumber *pid = [NSNumber numberWithInt:getpid()];
 
 			NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:4];
 			if (item) {
@@ -256,11 +260,13 @@ extern "C" mach_port_t bootstrap_port;
 	if (!messages) {
 		return;
 	}
+
 	_submittedMessages = nil;
 
 	for (NSString *key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
+
 	[messages release];
 }
 
