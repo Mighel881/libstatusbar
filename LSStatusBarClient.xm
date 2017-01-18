@@ -63,13 +63,13 @@ extern "C" mach_port_t bootstrap_port;
 		HBLogDebug(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
 	}
 
-	[_currentMessage release];
+	_currentMessage = nil;
 	if (_isLocal) {
-		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
+		_currentMessage = [[LSStatusBarServer sharedInstance] currentMessage];
 	} else {
 		CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 		rocketbootstrap_distributedmessagingcenter_apply(dmc);
-		_currentMessage = [[dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil] retain];
+		_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
 	}
 }
 
@@ -87,10 +87,9 @@ extern "C" mach_port_t bootstrap_port;
 
 	NSMutableArray *processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
-	[_titleStrings release];
-	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
+	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
 
-	int keyidx = 64; //(cfvers >= CF_70) ? 32 : 24;
+	int keyidx = 64;
 
 	extern NSMutableArray* customItems[3];
 
@@ -99,8 +98,6 @@ extern "C" mach_port_t bootstrap_port;
 			int cnt = [customItems[i] count]-1;
 			for (; cnt>= 0; cnt--) {
 				UIStatusBarCustomItem *item = [customItems[i] objectAtIndex:cnt];
-				//UIStatusBarCustomItem* item = [allCustomItems objectAtIndex: cnt];
-
 				NSString *indicatorName = [item indicatorName];
 
 				NSObject *properties = nil;
@@ -161,8 +158,6 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
-
-	[processedKeys release];
 	return YES;
 }
 
@@ -273,8 +268,6 @@ extern "C" mach_port_t bootstrap_port;
 			CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 			rocketbootstrap_distributedmessagingcenter_apply(dmc);
 			[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
-
-			[dict release];
 		}
 	}
 }
@@ -290,8 +283,6 @@ extern "C" mach_port_t bootstrap_port;
 	for (NSString *key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
-
-	[messages release];
 }
 
 @end

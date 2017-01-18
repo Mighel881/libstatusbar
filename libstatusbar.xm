@@ -142,25 +142,8 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 	float startPosition = [self _startPosition];
 	for (UIStatusBarItemView *view in [self _itemViewsSortedForLayout]) {
 		if (view.superview == nil) {
-			/*[view setVisible: NO];
-			if (cfvers >= CF_71)
-			{
-				[view setFrame: (CGRect) {{0.0f, 0.0f}, [self _frameForItemView:view startPosition:startPosition firstView:YES].size}];
-			}
-			else
-			{
-				[view setFrame: (CGRect) {{0.0f, 0.0f}, [self _frameForItemView:view startPosition:startPosition].size}];
-			}*/
-
-			// lol lets hope this works
 			view.visible = YES;
-			//NSString *exclusiveToApp = [view.item isKindOfClass:[%c(UIStatusBarCustomItem)]] ? [[view.item properties] objectForKey:@"exclusiveToApp"] : nil;
-			//if (!exclusiveToApp || [NSBundle.mainBundle.bundleIdentifier isEqualToString:exclusiveToApp])
-			//	view.visible = NO;
-
-			//[view setFrame:(CGRect){{startPosition, 0.0f}, [self _frameForItemView:view startPosition:startPosition firstView:YES].size}];
 			view.frame = [self _frameForItemView:view startPosition:startPosition firstView:YES];
-
 			[_foregroundView addSubview:view];
 		}
 

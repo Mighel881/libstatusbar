@@ -34,6 +34,7 @@ NSMutableDictionary *cachedImages[5];
 	if (!cachedImages[4]) {
 		cachedImages[4] = [[NSMutableDictionary alloc] init];
 	}
+	
 	if (cachedImages[4]) {
 		id ret = [cachedImages[4] objectForKey:expandedName_cache];
 		if (ret) {

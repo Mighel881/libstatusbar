@@ -35,7 +35,6 @@
 
 - (int)priority {
 	return %orig;
-	//return 0;
 }
 
 %new
@@ -46,8 +45,7 @@
 %new
 - (void)setProperties:(NSDictionary*)properties {
 	__strong NSDictionary* &_properties(MSHookIvar<NSDictionary*>(self, "_properties"));
-	[_properties release];
-	_properties = [properties retain];
+	_properties = properties;
 }
 
 - (Class)viewClass {
@@ -81,8 +79,7 @@
 %new
 -(void)setIndicatorName:(NSString*)name {
 	__strong NSString *&_indicatorName = MSHookIvar<NSString*>(self, "_indicatorName");
-	[_indicatorName release];
-	_indicatorName = [name retain];
+	_indicatorName = name;
 }
 
 %new

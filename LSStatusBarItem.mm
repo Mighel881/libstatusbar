@@ -38,7 +38,7 @@ NSMutableDictionary* sbitems = nil;
 			properties = [NSMutableDictionary new];
 		}
 
-		_identifier = [identifier retain];
+		_identifier = identifier;
 
 		[self _setProperties: properties];
 
@@ -51,10 +51,7 @@ NSMutableDictionary* sbitems = nil;
 
 		idArray = [sbitems objectForKey:identifier];
 		if (!idArray) {
-			// this creates a retain/release-less NSMutableArray
-			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
-			[sbitems setObject: idArray forKey: identifier];
-			CFRelease(idArray);
+			[sbitems setObject:[NSMutableArray array] forKey:identifier];
 		}
 
 		if (idArray) {
@@ -81,10 +78,10 @@ NSMutableDictionary* sbitems = nil;
 				[sbitems removeObjectForKey:_identifier];
 			}
 		}
-		[_identifier release];
-		[_properties release];
 	}
+#if !__has_feature(objc_arc)
 	[super dealloc];
+#endif
 }
 
 - (NSDictionary*)properties {
@@ -95,7 +92,7 @@ NSMutableDictionary* sbitems = nil;
 	if (dict == _properties) {
 		return;
 	}
-	[_properties release];
+	_properties = nil;
 
 	if (!dict) {
 		_properties = [NSMutableDictionary new];
@@ -168,8 +165,6 @@ NSMutableDictionary* sbitems = nil;
 	NSString *oldTitle = [_properties objectForKey:@"titleString"];
 
 	if ((!oldTitle && string) || (oldTitle && ![oldTitle isEqualToString:string])) {
-		//NSLog(@"oldTitle = %@, newTitle = %@", oldTitle, string);
-
 		[_properties setValue:string forKey:@"titleString"];
 
 		if (!_manualUpdate) {

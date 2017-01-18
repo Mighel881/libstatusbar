@@ -19,10 +19,8 @@
 	if (!_timeString) {
 		return %orig;
 	}
-
 	// Did it change?
 	BOOL isSame = [oldString isEqualToString:_timeString];
-	[oldString release];
 	return !isSame;
 }
 
@@ -44,12 +42,11 @@
 	}
 
 	NSString *oldTimeString = _timeString;
-	_timeString = [timeString retain];
+	_timeString = timeString;
 
 	id ret = %orig;
 
 	_timeString = oldTimeString;
-	[timeString release];
 
 	return ret;
 }
