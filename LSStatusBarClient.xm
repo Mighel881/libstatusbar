@@ -13,7 +13,7 @@
 @end
 
 @interface SBNotificationCenterController
-+ (instancetype)sharedInstance;
++ (instancetype)sharedInstanceIfExists;
 @property(readonly, assign, nonatomic) SBNotificationCenterViewController *viewController;
 @end
 
@@ -166,7 +166,7 @@ extern "C" mach_port_t bootstrap_port;
 	return YES;
 }
 
-- (void) updateStatusBar {
+- (void)updateStatusBar {
 	if (!%c(UIApplication)) {
 		return;
 	}
@@ -176,36 +176,60 @@ extern "C" mach_port_t bootstrap_port;
 	// need a decent guard band because we do call before UIApp exists
 	if ([self processCurrentMessage]) {
 		if (%c(UIApplication) && [%c(UIApplication) sharedApplication]) {
-			UIStatusBar *statusBar = [[%c(UIApplication) sharedApplication] statusBar];
+			id sb = [[%c(UIApplication) sharedApplication] statusBar];
 
-			if (!statusBar) {
+			if (!sb) {
 				return;
 			}
 
-			UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(statusBar, "_foregroundView");
+			UIStatusBarForegroundView *_foregroundView = MSHookIvar<UIStatusBarForegroundView*>(sb, "_foregroundView");
 			if (_foregroundView) {
-				[statusBar forceUpdateData:NO];
+				if (SYSTEM_VERSION_LESS_THAN(@"9.0")) {
+					[sb forceUpdateData: NO];
+				} else {
+					UIStatusBarComposedData *_currentData = MSHookIvar<UIStatusBarComposedData*>(_foregroundView, "_currentData");
+					if (_currentData) {
+						[_foregroundView _setStatusBarData:_currentData actions:1 animated:0];
+					}
+				}
 
 				if (_isLocal) {
 					if (%c(SBBulletinListController)) {
-						SBBulletinListView *listview = [[%c(SBBulletinListController) sharedInstance] listView];
+						id listview = [[%c(SBBulletinListController) sharedInstance] listView];
 						if (listview) {
-							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(listview, "_statusBar");
-							[_statusBar forceUpdateData:NO];
+							id _statusBar = MSHookIvar<id>(listview, "_statusBar");
+							if (SYSTEM_VERSION_LESS_THAN(@"9.0")) {
+								[_statusBar forceUpdateData:NO];
+							} else {
+								UIStatusBarForegroundView *_foregroundView2 = MSHookIvar<UIStatusBarForegroundView*>(_statusBar, "_foregroundView");
+								if (_foregroundView2) {
+									UIStatusBarComposedData *_currentData = MSHookIvar<UIStatusBarComposedData*>(_foregroundView2, "_currentData");
+									if (_currentData) {
+										[_foregroundView _setStatusBarData:_currentData actions:1 animated:0];
+									}
+								}
+							}
 						}
 					}
 
 					if (%c(SBNotificationCenterController)) {
-						SBNotificationCenterViewController *viewController = [[%c(SBNotificationCenterController) sharedInstance] viewController];
-						if (viewController) {
-							UIStatusBar *_statusBar = MSHookIvar<UIStatusBar*>(viewController, "_statusBar");
+						id vc = [[%c(SBNotificationCenterController) sharedInstanceIfExists] viewController];
+						if (vc) {
+							id _statusBar = MSHookIvar<id>(vc, "_statusBar");
 
 							if (_statusBar) {
-								// forceUpdateData: animated: doesn't work if statusbar._inProcessProvider = 1
-								// bypass and directly do it.
-
-								void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
-								[_statusBar forceUpdateToData:&_currentRawData animated:NO];
+								if (SYSTEM_VERSION_LESS_THAN(@"9.0")) {
+									void* &_currentRawData(MSHookIvar<void*>(_statusBar, "_currentRawData"));
+									[_statusBar forceUpdateToData:&_currentRawData animated:NO];
+								} else {
+									UIStatusBarForegroundView *_foregroundView2 = MSHookIvar<UIStatusBarForegroundView*>(_statusBar, "_foregroundView");
+									if (_foregroundView2) {
+										UIStatusBarComposedData *_currentData = MSHookIvar<UIStatusBarComposedData*>(_foregroundView2, "_currentData");
+										if (_currentData) {
+											[_foregroundView _setStatusBarData:_currentData actions:1 animated:0];
+										}
+									}
+								}
 							}
 						}
 					}

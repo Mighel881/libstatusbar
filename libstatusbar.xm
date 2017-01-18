@@ -164,7 +164,7 @@ void PrepareEnabledItemsCommon(UIStatusBarLayoutManager *self) {
 			[_foregroundView addSubview:view];
 		}
 
-		int type = view.item.type;
+		int type = [(UIStatusBarItem *)[view item] type];
 		if (type) {
 			startPosition = [self _positionAfterPlacingItemView:view startPosition:startPosition firstView:YES];
 		}

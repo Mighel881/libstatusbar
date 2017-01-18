@@ -48,6 +48,7 @@
 
 @interface UIStatusBarForegroundView : UIView
 - (UIStatusBarForegroundStyleAttributes*)foregroundStyle;
+- (void)_setStatusBarData:(id)arg1 actions:(int)arg2 animated:(BOOL)arg3;
 @end
 
 @interface UIColor (Protean)
@@ -683,4 +684,7 @@
 @end
 
 @interface SBBulletinListView : UIView
+@end
+
+@interface UIStatusBarComposedData : NSObject
 @end
