@@ -2,7 +2,7 @@ This is a fork of Elijah Frederickson's fork of libstatusbar. (Keeping it update
 
 It contains some improvements and fixes including:
 - Updated to use Logos (and many other syntax enhancements)
-- Updated to use ARC* (Not Yet)
+- Updated to use ARC
 - Only hooks into UIKit processes using the MobileSubstrate filter
 - Fix enumeration crash
 - Allows icons in the center
