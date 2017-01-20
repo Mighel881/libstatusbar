@@ -7,13 +7,13 @@
 
 %hook UIStatusBarTimeItemView
 - (BOOL)updateForNewData:(id)arg1 actions:(int)arg2 {
-	__strong NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
-	NSString *oldString = _timeString;
+	NSString *&_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSString *oldString = [_timeString retain];
 
 	int idx = [[[LSStatusBarClient sharedInstance] currentMessage][@"TitleStringIndex"] intValue];
 
 	// Fetch current string
-	_timeString = [[LSStatusBarClient sharedInstance] titleStringAtIndex:idx];
+	_timeString = [[[LSStatusBarClient sharedInstance] titleStringAtIndex:idx] retain];
 
 	// If not...
 	if (!_timeString) {
@@ -21,11 +21,12 @@
 	}
 	// Did it change?
 	BOOL isSame = [oldString isEqualToString:_timeString];
+	[oldString release];
 	return !isSame;
 }
 
 - (_UILegibilityImageSet*)contentsImage {
-	__strong NSString* &_timeString(MSHookIvar<NSString*>(self, "_timeString"));
+	NSString* &_timeString(MSHookIvar<NSString*>(self, "_timeString"));
 	NSMutableString *timeString = [_timeString mutableCopy];
 
 	float maxlen;
@@ -42,11 +43,12 @@
 	}
 
 	NSString *oldTimeString = _timeString;
-	_timeString = timeString;
+	_timeString = [timeString retain];
 
 	id ret = %orig;
 
 	_timeString = oldTimeString;
+	[timeString release];
 
 	return ret;
 }

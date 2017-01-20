@@ -111,14 +111,14 @@ static void NoteExitKQueueCallback(
     NSNumber *              pidinfo
 )
 {
-    [[LSStatusBarServer sharedInstance] pidDidExit:pidinfo];
+    [[LSStatusBarServer sharedInstance] pidDidExit:[pidinfo autorelease]];
 }
 
 
 void MonitorPID(NSNumber *pid) {
     int                     kq;
     struct kevent           changes;
-    CFFileDescriptorContext context = { 0, (void *)CFBridgingRetain(pid), NULL, NULL, NULL };
+    CFFileDescriptorContext context = { 0, [pid retain], NULL, NULL, NULL };
     CFRunLoopSourceRef      rls;
 
     kq = kqueue();

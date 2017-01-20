@@ -38,7 +38,7 @@ NSMutableDictionary* sbitems = nil;
 			properties = [NSMutableDictionary new];
 		}
 
-		_identifier = identifier;
+		_identifier = [identifier retain];
 
 		[self _setProperties: properties];
 
@@ -51,7 +51,10 @@ NSMutableDictionary* sbitems = nil;
 
 		idArray = [sbitems objectForKey:identifier];
 		if (!idArray) {
-			[sbitems setObject:[NSMutableArray array] forKey:identifier];
+			// this creates a retain/release-less NSMutableArray
+ 			idArray = (NSMutableArray*) CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
+ 			[sbitems setObject: idArray forKey: identifier];
+ 			CFRelease(idArray);
 		}
 
 		if (idArray) {
@@ -78,10 +81,10 @@ NSMutableDictionary* sbitems = nil;
 				[sbitems removeObjectForKey:_identifier];
 			}
 		}
+		[_identifier release];
+		[_properties release];
 	}
-#if !__has_feature(objc_arc)
 	[super dealloc];
-#endif
 }
 
 - (NSDictionary*)properties {
@@ -92,7 +95,7 @@ NSMutableDictionary* sbitems = nil;
 	if (dict == _properties) {
 		return;
 	}
-	_properties = nil;
+	[_properties release];
 
 	if (!dict) {
 		_properties = [NSMutableDictionary new];

@@ -4,7 +4,7 @@ Provides: libstatusbar
 Replaces: libstatusbar
 Conflicts: libstatusbar
 Depends: mobilesubstrate, com.rpetrich.rocketbootstrap
-Version: 0.6
+Version: 0.6.5
 Architecture: iphoneos-arm
 Description: Improved libstatusbar
 Maintainer: Shade Zepheri <ziroalpha@gmail.com>

@@ -63,13 +63,13 @@ extern "C" mach_port_t bootstrap_port;
 		HBLogDebug(@"[libstatusbar] invalid process, cancelling request to retrieve current message");
 	}
 
-	_currentMessage = nil;
+	[_currentMessage release];
 	if (_isLocal) {
-		_currentMessage = [[LSStatusBarServer sharedInstance] currentMessage];
+		_currentMessage = [[[LSStatusBarServer sharedInstance] currentMessage] retain];
 	} else {
 		CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 		rocketbootstrap_distributedmessagingcenter_apply(dmc);
-		_currentMessage = [dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil];
+		_currentMessage = [[dmc sendMessageAndReceiveReplyName:@"currentMessage" userInfo:nil] retain];
 	}
 }
 
@@ -87,7 +87,8 @@ extern "C" mach_port_t bootstrap_port;
 
 	NSMutableArray *processedKeys = [[_currentMessage objectForKey:@"keys"] mutableCopy];
 
-	_titleStrings = [_currentMessage objectForKey:@"titleStrings"];
+	[_titleStrings release];
+	_titleStrings = [[_currentMessage objectForKey: @"titleStrings"] retain];
 
 	int keyidx = 64;
 
@@ -158,6 +159,7 @@ extern "C" mach_port_t bootstrap_port;
 			}
 		}
 	}
+	[processedKeys release];
 	return YES;
 }
 
@@ -268,6 +270,8 @@ extern "C" mach_port_t bootstrap_port;
 			CPDistributedMessagingCenter *dmc = [CPDistributedMessagingCenter centerNamed:@"com.apple.springboard.libstatusbar"];
 			rocketbootstrap_distributedmessagingcenter_apply(dmc);
 			[dmc sendMessageName:@"setProperties:userInfo:" userInfo:dict];
+
+			[dict release];
 		}
 	}
 }
@@ -283,6 +287,7 @@ extern "C" mach_port_t bootstrap_port;
 	for (NSString *key in messages) {
 		[self setProperties:[messages objectForKey:key] forItem:key];
 	}
+	[messages release];
 }
 
 @end
